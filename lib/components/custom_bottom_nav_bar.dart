@@ -49,30 +49,41 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
         color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black,
+            color: const Color.fromARGB(255, 126, 126, 126),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
         ],
       ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF00BCD4),
-        unselectedItemColor: Colors.grey[600],
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        currentIndex: currentIndex,
-        onTap: (index) => _onTap(context, index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'หน้าหลัก'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'แผนที่'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'บล็อก'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'โปรไฟล์'),
-        ],
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: const Color(0xFF00BCD4),
+          unselectedItemColor: Colors.grey[600],
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          currentIndex: currentIndex,
+          onTap: (index) => _onTap(context, index),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'หน้าหลัก'),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'แผนที่'),
+            BottomNavigationBarItem(icon: Icon(Icons.book), label: 'บล็อก'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'โปรไฟล์'),
+          ],
+        ),
       ),
     );
   }
