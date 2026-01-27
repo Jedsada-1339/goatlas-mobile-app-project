@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:goatlas/screens/trip_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/trip_screen.dart';
 import '../screens/blog_screen.dart';
