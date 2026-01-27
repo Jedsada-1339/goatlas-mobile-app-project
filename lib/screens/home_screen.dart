@@ -3,6 +3,9 @@ import '../models/destination.dart';
 import '../components/custom_search_bar.dart';
 import '../components/category_chip.dart';
 import '../components/destination_card.dart';
+import 'map_screen.dart';
+import 'blog_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -68,6 +71,32 @@ class _HomeScreenState extends State<HomeScreen> {
         isFavorite: !destination.isFavorite,
       );
     });
+  }
+
+  void _onBottomNavTap(int index) {
+    switch (index) {
+      case 0:
+        // Already on home screen, do nothing
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MapScreen()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const BlogScreen()),
+        );
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        );
+        break;
+    }
   }
 
   @override
@@ -150,8 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 24),
 
                 // Search Bar
                 Padding(
@@ -281,6 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
           selectedFontSize: 12,
           unselectedFontSize: 12,
           currentIndex: 0,
+          onTap: _onBottomNavTap,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'หน้าหลัก'),
             BottomNavigationBarItem(icon: Icon(Icons.map), label: 'แผนที่'),
