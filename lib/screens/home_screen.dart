@@ -3,7 +3,7 @@ import '../models/destination.dart';
 import '../components/custom_search_bar.dart';
 import '../components/category_chip.dart';
 import '../components/destination_card.dart';
-import 'map_screen.dart';
+import 'trip_screen.dart';
 import 'blog_screen.dart';
 import 'profile_screen.dart';
 
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MapScreen()),
+          MaterialPageRoute(builder: (context) => const TripScreen()),
         );
         break;
       case 2:
@@ -311,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: _onBottomNavTap,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'หน้าหลัก'),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'แผนที่'),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'ทริป'),
             BottomNavigationBarItem(icon: Icon(Icons.book), label: 'บล็อก'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'โปรไฟล์'),
           ],
