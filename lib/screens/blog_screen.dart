@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../components/custom_bottom_nav_bar.dart';
 
 class BlogScreen extends StatelessWidget {
   const BlogScreen({Key? key}) : super(key: key);
@@ -11,6 +12,7 @@ class BlogScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.black87),
+        automaticallyImplyLeading: false, // ซ่อนปุ่ม back
       ),
       body: Center(
         child: Column(
@@ -34,6 +36,7 @@ class BlogScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
     );
   }
 }

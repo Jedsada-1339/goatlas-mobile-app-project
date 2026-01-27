@@ -3,9 +3,7 @@ import '../models/destination.dart';
 import '../components/custom_search_bar.dart';
 import '../components/category_chip.dart';
 import '../components/destination_card.dart';
-import 'trip_screen.dart';
-import 'blog_screen.dart';
-import 'profile_screen.dart';
+import '../components/custom_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -71,32 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
         isFavorite: !destination.isFavorite,
       );
     });
-  }
-
-  void _onBottomNavTap(int index) {
-    switch (index) {
-      case 0:
-        // Already on home screen, do nothing
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TripScreen()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const BlogScreen()),
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        );
-        break;
-    }
   }
 
   @override
@@ -290,33 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFF00BCD4),
-          unselectedItemColor: Colors.grey[600],
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          currentIndex: 0,
-          onTap: _onBottomNavTap,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'หน้าหลัก'),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'ทริป'),
-            BottomNavigationBarItem(icon: Icon(Icons.book), label: 'บล็อก'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'โปรไฟล์'),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
     );
   }
 
