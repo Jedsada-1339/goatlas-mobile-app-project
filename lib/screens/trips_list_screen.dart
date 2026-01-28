@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../components/custom_bottom_nav_bar.dart';
+import '../components/cached_image_with_placeholder.dart';
 import '../models/trip_model.dart';
 import '../models/sample_data.dart';
 import 'create_trip_screen.dart';
@@ -315,23 +316,21 @@ class _TripsListScreenState extends State<TripsListScreen> {
               ),
               child: Stack(
                 children: [
-                  Image.network(
-                    trip.coverImageUrl,
+                  CachedImageWithPlaceholder(
+                    imageUrl: trip.coverImageUrl,
                     width: double.infinity,
                     height: 160,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: double.infinity,
-                        height: 160,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.landscape,
-                          size: 60,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
+                    errorWidget: Container(
+                      width: double.infinity,
+                      height: 160,
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.landscape,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
                   // Gradient Overlay
                   Positioned(

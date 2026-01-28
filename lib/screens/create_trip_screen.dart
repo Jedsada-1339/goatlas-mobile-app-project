@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../components/custom_bottom_nav_bar.dart';
+import '../components/cached_image_with_placeholder.dart';
 import '../models/trip_model.dart';
 import '../models/day_plan_model.dart';
 import '../models/place_model.dart';
@@ -229,21 +230,19 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             // Image
             ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: Image.network(
-                _currentTrip.coverImageUrl,
+              child: CachedImageWithPlaceholder(
+                imageUrl: _currentTrip.coverImageUrl,
                 width: double.infinity,
                 height: 180,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.landscape,
-                      size: 60,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
+                errorWidget: Container(
+                  color: Colors.grey[300],
+                  child: const Icon(
+                    Icons.landscape,
+                    size: 60,
+                    color: Colors.grey,
+                  ),
+                ),
               ),
             ),
             // Gradient Overlay
@@ -720,21 +719,17 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image
-                ClipRRect(
+                CachedImageWithPlaceholder(
+                  imageUrl: place.imageUrl,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    place.imageUrl,
+                  errorWidget: Container(
                     width: 60,
                     height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 60,
-                        height: 60,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.landscape, color: Colors.grey),
-                      );
-                    },
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.landscape, color: Colors.grey),
                   ),
                 ),
                 const SizedBox(width: 12),

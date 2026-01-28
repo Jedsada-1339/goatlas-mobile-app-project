@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/place_model.dart';
 import '../models/sample_data.dart';
+import '../components/cached_image_with_placeholder.dart';
 
 /// หน้าเพิ่มสถานที่ให้กับทริป
 class AddPlaceScreen extends StatefulWidget {
@@ -277,21 +278,17 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             child: Row(
               children: [
                 // Image
-                ClipRRect(
+                CachedImageWithPlaceholder(
+                  imageUrl: place.imageUrl,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    place.imageUrl,
+                  errorWidget: Container(
                     width: 80,
                     height: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 80,
-                        height: 80,
-                        color: Colors.grey[300],
-                        child: Icon(Icons.landscape, color: Colors.grey[400]),
-                      );
-                    },
+                    color: Colors.grey[300],
+                    child: Icon(Icons.landscape, color: Colors.grey[400]),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -428,25 +425,21 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
+            CachedImageWithPlaceholder(
+              imageUrl: place.imageUrl,
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                place.imageUrl,
+              errorWidget: Container(
                 width: double.infinity,
                 height: 120,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: double.infinity,
-                    height: 120,
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.landscape,
-                      size: 40,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
+                color: Colors.grey[300],
+                child: const Icon(
+                  Icons.landscape,
+                  size: 40,
+                  color: Colors.grey,
+                ),
               ),
             ),
             const SizedBox(height: 12),

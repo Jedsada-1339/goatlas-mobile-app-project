@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/destination.dart';
+import 'cached_image_with_placeholder.dart';
 
 class DestinationCard extends StatelessWidget {
   final Destination destination;
@@ -41,19 +42,9 @@ class DestinationCard extends StatelessWidget {
             children: [
               // Background Image
               Positioned.fill(
-                child: Image.network(
-                  destination.imageUrl,
+                child: CachedFullImage(
+                  imageUrl: destination.imageUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Icon(
-                        Icons.image,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
                 ),
               ),
 
