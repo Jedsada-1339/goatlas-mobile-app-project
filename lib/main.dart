@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
 
 void main() {
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.cyan,
         primaryColor: const Color(0xFF00BCD4),
-        fontFamily: 'Sarabun', // ใช้ฟอนต์ไทยถ้ามี
+        // ใช้ font Prompt สำหรับทั้งแอป
+        textTheme: GoogleFonts.promptTextTheme(Theme.of(context).textTheme),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
           elevation: 0,

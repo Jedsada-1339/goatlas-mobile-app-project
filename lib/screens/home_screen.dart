@@ -452,8 +452,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         const SizedBox(height: 20),
 
-                        const Divider(thickness: 1, color: Colors.grey),
-
                         // Blog Cards
                         SizedBox(
                           height: 250,

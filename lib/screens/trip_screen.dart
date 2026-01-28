@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../components/custom_bottom_nav_bar.dart';
-import 'create_trip_screen.dart';
+import 'trips_list_screen.dart';
 
 class TripScreen extends StatelessWidget {
   const TripScreen({Key? key}) : super(key: key);
@@ -60,7 +60,7 @@ class TripScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const CreateTripScreen(),
+                    builder: (context) => const TripsListScreen(),
                   ),
                 );
               },
@@ -87,7 +87,7 @@ class TripScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const CreateTripScreen()),
+            MaterialPageRoute(builder: (context) => const TripsListScreen()),
           );
         },
         backgroundColor: primaryColor,
