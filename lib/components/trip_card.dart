@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/destination.dart';
+import '../models/trip.dart';
 
-class DestinationCard extends StatelessWidget {
-  final Destination destination;
+class TripCard extends StatelessWidget {
+  final Trip trip;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onTap;
   final double height; // เพิ่ม parameter สำหรับกำหนดความสูง
   final double width; // เพิ่ม parameter สำหรับกำหนดความกว้าง
 
-  const DestinationCard({
+  const TripCard({
     Key? key,
-    required this.destination,
+    required this.trip,
     this.onFavoriteToggle,
     this.onTap,
     this.height = 280, // ความสูงเริ่มต้น 280 pixels
@@ -23,7 +23,7 @@ class DestinationCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        height: height, // กำหนดความสูงคงที่
+        height: height,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -42,7 +42,7 @@ class DestinationCard extends StatelessWidget {
               // Background Image
               Positioned.fill(
                 child: Image.network(
-                  destination.imageUrl,
+                  trip.imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
@@ -87,12 +87,8 @@ class DestinationCard extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      destination.isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: destination.isFavorite
-                          ? Colors.red
-                          : Colors.grey[600],
+                      trip.isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: trip.isFavorite ? Colors.red : Colors.grey[600],
                       size: 20,
                     ),
                   ),
@@ -120,7 +116,7 @@ class DestinationCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              destination.name,
+                              trip.name,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -134,7 +130,7 @@ class DestinationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        destination.location,
+                        "คะแนนรีวิว ${trip.ratingText}",
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 12,
