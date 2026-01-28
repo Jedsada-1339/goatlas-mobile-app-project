@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/home_screen.dart';
-import '../screens/create_trip_screen.dart';
+import '../screens/trips_list_screen.dart';
 import '../screens/blog_screen.dart';
 import '../screens/profile_screen.dart';
 
@@ -21,7 +21,7 @@ class CustomBottomNavBar extends StatelessWidget {
         screen = const HomeScreen();
         break;
       case 1:
-        screen = const CreateTripScreen();
+        screen = const TripsListScreen();
         break;
       case 2:
         screen = const BlogScreen();
@@ -55,7 +55,7 @@ class CustomBottomNavBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromARGB(255, 126, 126, 126),
+            color: const Color.fromARGB(255, 135, 135, 135).withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

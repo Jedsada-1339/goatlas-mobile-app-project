@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import '../components/custom_bottom_nav_bar.dart';
+import '../models/trip_model.dart';
+import '../models/day_plan_model.dart';
+import '../models/place_model.dart';
+import 'add_place_screen.dart';
 
+/// หน้าสร้าง/แก้ไขทริป
 class CreateTripScreen extends StatefulWidget {
-  const CreateTripScreen({Key? key}) : super(key: key);
+  final TripModel? trip;
+
+  const CreateTripScreen({Key? key, this.trip}) : super(key: key);
 
   @override
   State<CreateTripScreen> createState() => _CreateTripScreenState();
@@ -11,14 +18,114 @@ class CreateTripScreen extends StatefulWidget {
 class _CreateTripScreenState extends State<CreateTripScreen> {
   int _selectedDay = 1;
   final TextEditingController _tripNameController = TextEditingController();
-  final List<int> _days = [1, 2, 3];
+  late TripModel _currentTrip;
+  bool _isEditing = false;
 
   Color get primaryColor => Theme.of(context).primaryColor;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.trip != null) {
+      _currentTrip = widget.trip!;
+      _tripNameController.text = _currentTrip.name;
+      _isEditing = true;
+    } else {
+      // สร้างทริปใหม่พร้อม 3 วันเริ่มต้น
+      _currentTrip = TripModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: '',
+        coverImageUrl:
+            'https://images.unsplash.com/photo-1512553785840-eeaffc1fcf8c',
+        dayPlans: [
+          DayPlanModel(dayNumber: 1),
+          DayPlanModel(dayNumber: 2),
+          DayPlanModel(dayNumber: 3),
+        ],
+      );
+    }
+  }
 
   @override
   void dispose() {
     _tripNameController.dispose();
     super.dispose();
+  }
+
+  DayPlanModel get _currentDayPlan {
+    if (_selectedDay <= _currentTrip.dayPlans.length) {
+      return _currentTrip.dayPlans[_selectedDay - 1];
+    }
+    return DayPlanModel(dayNumber: _selectedDay);
+  }
+
+  void _addDay() {
+    setState(() {
+      _currentTrip = _currentTrip.addDay();
+    });
+  }
+
+  void _removeDay(int dayNumber) {
+    if (_currentTrip.dayPlans.length <= 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ไม่สามารถลบได้ ทริปต้องมีอย่างน้อย 1 วัน'),
+          backgroundColor: Color(0xFFEF4444),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _currentTrip = _currentTrip.removeDay(dayNumber);
+      if (_selectedDay > _currentTrip.dayPlans.length) {
+        _selectedDay = _currentTrip.dayPlans.length;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('ลบวันที่ $dayNumber เรียบร้อยแล้ว'),
+        backgroundColor: primaryColor,
+      ),
+    );
+  }
+
+  void _addPlaceToCurrentDay(PlaceModel place) {
+    setState(() {
+      _currentTrip = _currentTrip.addPlaceToDay(_selectedDay, place);
+    });
+  }
+
+  void _removePlaceFromCurrentDay(String placeId) {
+    setState(() {
+      _currentTrip = _currentTrip.removePlaceFromDay(_selectedDay, placeId);
+    });
+  }
+
+  void _saveTrip() {
+    if (_tripNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('กรุณาใส่ชื่อทริป'),
+          backgroundColor: Color(0xFFEF4444),
+        ),
+      );
+      return;
+    }
+
+    final savedTrip = _currentTrip.copyWith(name: _tripNameController.text);
+
+    Navigator.pop(context, savedTrip);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isEditing ? 'บันทึกทริปเรียบร้อยแล้ว' : 'สร้างทริปสำเร็จ!',
+        ),
+        backgroundColor: primaryColor,
+      ),
+    );
   }
 
   @override
@@ -56,8 +163,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           ],
         ),
       ),
-      // Create Trip Button
-      floatingActionButton: _buildCreateTripButton(),
+      // Save Trip Button
+      floatingActionButton: _buildSaveTripButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
     );
@@ -85,9 +192,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             ),
           ),
           // Title
-          const Text(
-            'Create New Trip',
-            style: TextStyle(
+          Text(
+            _isEditing ? 'แก้ไขทริป' : 'สร้างทริปใหม่',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.5,
@@ -123,7 +230,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Image.network(
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuC_ibFwOVCNk5eCjl8uBlNPQ587YFFj3ppkREDHYNSAIJ4Yv01mPw2soS8N6uu4BDPVjk-mdUJ5kpGwyiI07KUrV682LMR00uzUR_8NtLvxGxJmpHTbYv0CRZmUc3NOsE0884GkmYd-I7vFKpp8CSkCnUMxLYed_teIAzquMrDzl_4hSDvU_Zfw2OngEbTI4ie6jDXCYmooEqEUuPIW5Y0A34VLj9ETXNLD_IuUdWBQL6yGl_I5pQJ-R_aVpyOsGDgY2GBZsq-9RmH4',
+                _currentTrip.coverImageUrl,
                 width: double.infinity,
                 height: 180,
                 fit: BoxFit.cover,
@@ -170,13 +277,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     ),
                   ],
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Icon(Icons.edit, size: 16, color: Color(0xFF0F172A)),
                     SizedBox(width: 6),
                     Text(
-                      'Change Cover',
+                      'เปลี่ยนรูปปก',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -202,7 +309,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           const Padding(
             padding: EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
-              'TRIP NAME',
+              'ชื่อทริป',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -220,7 +327,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               controller: _tripNameController,
               style: const TextStyle(fontSize: 16, color: Color(0xFF0F172A)),
               decoration: InputDecoration(
-                hintText: 'e.g. Summer in Santorini',
+                hintText: 'เช่น เชียงใหม่ 3 วัน 2 คืน',
                 hintStyle: TextStyle(fontSize: 16, color: Colors.grey[400]),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
@@ -242,9 +349,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         physics: const BouncingScrollPhysics(),
-        itemCount: _days.length + 1, // +1 for Add button
+        itemCount: _currentTrip.dayPlans.length + 1, // +1 for Add button
         itemBuilder: (context, index) {
-          if (index == _days.length) {
+          if (index == _currentTrip.dayPlans.length) {
             // Add Day Button
             return _buildAddDayButton();
           }
@@ -256,11 +363,17 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
   Widget _buildDayItem(int day) {
     final isSelected = _selectedDay == day;
+    final dayPlan = _currentTrip.dayPlans[day - 1];
+    final placeCount = dayPlan.places.length;
+
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedDay = day;
         });
+      },
+      onLongPress: () {
+        _showDeleteDayDialog(day);
       },
       child: Container(
         width: 96,
@@ -282,42 +395,145 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 ]
               : null,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Text(
-              'Day',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: isSelected
-                    ? Colors.white.withOpacity(0.8)
-                    : const Color(0xFF94A3B8),
-                letterSpacing: 2,
+            // Main Content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'วันที่',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.8)
+                          : const Color(0xFF94A3B8),
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    day.toString().padLeft(2, '0'),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF94A3B8),
+                    ),
+                  ),
+                  if (placeCount > 0)
+                    Text(
+                      '$placeCount สถานที่',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected
+                            ? Colors.white.withOpacity(0.7)
+                            : const Color(0xFF94A3B8),
+                      ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              day.toString().padLeft(2, '0'),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+            // Delete Button (only show if more than 1 day)
+            if (_currentTrip.dayPlans.length > 1)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: GestureDetector(
+                  onTap: () => _showDeleteDayDialog(day),
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.2)
+                          : const Color(0xFFE2E8F0),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      size: 14,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.8)
+                          : const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
+  void _showDeleteDayDialog(int day) {
+    if (_currentTrip.dayPlans.length <= 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ไม่สามารถลบได้ ทริปต้องมีอย่างน้อย 1 วัน'),
+          backgroundColor: Color(0xFFEF4444),
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text(
+          'ลบวัน',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        content: Text(
+          'ต้องการลบวันที่ $day หรือไม่?\nสถานที่ทั้งหมดในวันนี้จะถูกลบด้วย',
+          style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'ยกเลิก',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _removeDay(day);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'ลบ',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAddDayButton() {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _days.add(_days.length + 1);
-        });
-      },
+      onTap: _addDay,
       child: Container(
         width: 96,
         height: 96,
@@ -330,45 +546,73 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             style: BorderStyle.solid,
           ),
         ),
-        child: const Icon(Icons.add, size: 32, color: Color(0xFFCBD5E1)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add, size: 28, color: Color(0xFFCBD5E1)),
+            const SizedBox(height: 4),
+            Text(
+              'เพิ่มวัน',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[400],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTimeline() {
+    final dayPlan = _currentDayPlan;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Timeline Line
-          Positioned(
-            left: 24,
-            top: 48,
-            bottom: 48,
-            child: Container(width: 2, color: const Color(0xFFF1F5F9)),
-          ),
-          // Timeline Items
-          Column(
+          // Section Title
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStayingAtItem(),
-              const SizedBox(height: 24),
-              _buildDestinationItem(
-                number: 1,
-                title: 'Oia Village',
-                description:
-                    'Iconic whitewashed buildings with blue domes. Perfect for sunset photography and walking around.',
-                isActive: true,
+              Text(
+                'กำหนดการวันที่ $_selectedDay',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF0F172A),
+                ),
               ),
-              const SizedBox(height: 24),
-              _buildAddDestinationItem(number: 2),
+              Text(
+                '${dayPlan.places.length} สถานที่',
+                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+              ),
             ],
           ),
+          const SizedBox(height: 16),
+          // Hotel
+          if (dayPlan.hotelName != null) ...[
+            _buildHotelItem(dayPlan.hotelName!),
+            const SizedBox(height: 16),
+          ],
+          // Places
+          ...List.generate(
+            dayPlan.places.length,
+            (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _buildPlaceItem(dayPlan.places[index], index + 1),
+            ),
+          ),
+          // Add Place Button
+          _buildAddPlaceItem(dayPlan.places.length + 1),
         ],
       ),
     );
   }
 
-  Widget _buildStayingAtItem() {
+  Widget _buildHotelItem(String hotelName) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -398,19 +642,19 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'STAYING AT',
+              children: [
+                const Text(
+                  'ที่พัก',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF94A3B8),
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Grace Santorini Hotel',
-                  style: TextStyle(
+                  hotelName,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF0F172A),
@@ -424,12 +668,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     );
   }
 
-  Widget _buildDestinationItem({
-    required int number,
-    required String title,
-    required String description,
-    required bool isActive,
-  }) {
+  Widget _buildPlaceItem(PlaceModel place, int number) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -438,26 +677,24 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: isActive ? primaryColor : const Color(0xFFF1F5F9),
+            color: primaryColor,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 4),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.2),
-                      blurRadius: 20,
-                      offset: const Offset(0, 5),
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
           child: Center(
             child: Text(
               number.toString(),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isActive ? Colors.white : const Color(0xFF94A3B8),
+                color: Colors.white,
               ),
             ),
           ),
@@ -466,7 +703,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         // Content
         Expanded(
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -482,31 +719,64 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    place.imageUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 60,
+                        height: 60,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.landscape, color: Colors.grey),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        place.name,
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1E293B),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
-                        description,
+                        '${place.location} • ${place.duration}',
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: Color(0xFF64748B),
-                          height: 1.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.more_vert, color: Color(0xFFCBD5E1), size: 20),
+                // Delete Button
+                GestureDetector(
+                  onTap: () => _removePlaceFromCurrentDay(place.id),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEE2E2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.delete_outline,
+                      size: 16,
+                      color: Color(0xFFEF4444),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -515,7 +785,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     );
   }
 
-  Widget _buildAddDestinationItem({required int number}) {
+  Widget _buildAddPlaceItem(int number) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -542,34 +812,51 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         const SizedBox(width: 16),
         // Add Button
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFFE2E8F0),
-                width: 2,
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: Row(
-              children: const [
-                Icon(
-                  Icons.add_location_alt,
-                  color: Color(0xFF94A3B8),
-                  size: 20,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'Add a destination...',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF94A3B8),
+          child: GestureDetector(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddPlaceScreen()),
+              );
+              if (result != null && result is PlaceModel) {
+                _addPlaceToCurrentDay(result);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('เพิ่ม "${result.name}" เรียบร้อยแล้ว'),
+                    backgroundColor: primaryColor,
                   ),
+                );
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFFE2E8F0),
+                  width: 2,
+                  style: BorderStyle.solid,
                 ),
-              ],
+              ),
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.add_location_alt,
+                    color: Color(0xFF94A3B8),
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'เพิ่มสถานที่...',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -577,21 +864,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     );
   }
 
-  Widget _buildCreateTripButton() {
+  Widget _buildSaveTripButton() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: () {
-          // Handle create trip
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Trip created successfully!'),
-              backgroundColor: primaryColor,
-            ),
-          );
-        },
+        onPressed: _saveTrip,
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
@@ -603,17 +882,17 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Text(
-              'CREATE TRIP',
-              style: TextStyle(
+              _isEditing ? 'บันทึกทริป' : 'สร้างทริป',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
               ),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.arrow_forward, size: 20),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward, size: 20),
           ],
         ),
       ),
