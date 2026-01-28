@@ -28,6 +28,14 @@ class CachedImageWithPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if width/height are valid finite numbers for memCache
+    final int? cacheWidth = (width != null && width!.isFinite)
+        ? (width! * 2).toInt()
+        : null;
+    final int? cacheHeight = (height != null && height!.isFinite)
+        ? (height! * 2).toInt()
+        : null;
+
     Widget imageWidget = CachedNetworkImage(
       imageUrl: imageUrl,
       width: width,
@@ -38,8 +46,8 @@ class CachedImageWithPlaceholder extends StatelessWidget {
           errorWidget ?? _buildDefaultErrorWidget(),
       fadeInDuration: const Duration(milliseconds: 300),
       fadeOutDuration: const Duration(milliseconds: 300),
-      memCacheWidth: width != null ? (width! * 2).toInt() : null,
-      memCacheHeight: height != null ? (height! * 2).toInt() : null,
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
     );
 
     if (borderRadius != null) {
