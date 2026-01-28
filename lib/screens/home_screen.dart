@@ -8,6 +8,7 @@ import '../components/category_chip.dart';
 import '../components/destination_card.dart';
 import '../components/custom_bottom_nav_bar.dart';
 import '../components/blog_card.dart';
+import '../components/drawer_listview.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -190,6 +191,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Right Side Drawer Menu
+      endDrawer: Drawer(child: DrawerListview()),
+
+      // Main Body
       body: Stack(
         children: [
           // Background Image
@@ -261,12 +266,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                         const Spacer(),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.menu,
-                            color: Colors.white,
-                            size: 28,
+                        Builder(
+                          builder: (context) => IconButton(
+                            onPressed: () {
+                              Scaffold.of(context).openEndDrawer();
+                            },
+                            icon: const Icon(
+                              Icons.menu,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ],
