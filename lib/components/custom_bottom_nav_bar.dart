@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goatlas/screens/trip_screen.dart';
 import '../screens/home_screen.dart';
-import '../screens/trip_screen.dart';
+import '../screens/create_trip_screen.dart';
 import '../screens/blog_screen.dart';
 import '../screens/profile_screen.dart';
 
@@ -22,7 +21,7 @@ class CustomBottomNavBar extends StatelessWidget {
         screen = const HomeScreen();
         break;
       case 1:
-        screen = const TripScreen();
+        screen = const CreateTripScreen();
         break;
       case 2:
         screen = const BlogScreen();
