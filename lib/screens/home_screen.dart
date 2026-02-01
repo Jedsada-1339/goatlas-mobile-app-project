@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goatlas/components/trip_card.dart';
 import '../models/destination.dart';
 import '../models/trip.dart';
-import '../models/blog_post.dart';
+import '../models/blog_model.dart';
 import '../components/custom_search_bar.dart';
 import '../components/category_chip.dart';
 import '../components/destination_card.dart';
