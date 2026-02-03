@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/profile_screen.dart';
 
 class DrawerListview extends StatelessWidget {
   const DrawerListview({Key? key}) : super(key: key);
@@ -111,7 +112,10 @@ class DrawerListview extends StatelessWidget {
                 icon: Icons.person_rounded,
                 label: 'โปรไฟล์',
                 color: const Color(0xFF42A5F5),
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileScreen()),
+                ),
               ),
               _DrawerItem(
                 icon: Icons.notifications_rounded,
