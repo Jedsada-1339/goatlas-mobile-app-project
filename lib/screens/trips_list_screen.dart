@@ -86,17 +86,17 @@ class _TripsListScreenState extends State<TripsListScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.chevron_left,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                ),
+                // child: Material(
+                //   color: Colors.transparent,
+                //   child: InkWell(
+                //     borderRadius: BorderRadius.circular(20),
+                //     onTap: () => Navigator.pop(context),
+                //     child: const Icon(
+                //       Icons.chevron_left,
+                //       color: Color(0xFF64748B),
+                //     ),
+                //   ),
+                // ),
               ),
               // Title
               const Text(
