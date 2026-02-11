@@ -6,6 +6,7 @@ class BlogCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double width;
   final bool showPostImage;
+  final EdgeInsetsGeometry? margin;
 
   const BlogCard({
     Key? key,
@@ -13,6 +14,7 @@ class BlogCard extends StatelessWidget {
     this.onTap,
     this.width = 320,
     this.showPostImage = true,
+    this.margin,
   }) : super(key: key);
 
   @override
@@ -21,7 +23,7 @@ class BlogCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        margin: const EdgeInsets.only(right: 16),
+        margin: margin ?? const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
