@@ -14,23 +14,44 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Travel App',
       debugShowCheckedModeBanner: false,
+
+      // ✅ ให้ระบบเลือกตาม device (light/dark)
+      themeMode: ThemeMode.system,
+
+      // 🌞 Light Theme
       theme: ThemeData(
+        brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF00BCD4),
-          primary: const Color(0xFF00BCD4),
+          brightness: Brightness.light,
         ),
         useMaterial3: true,
-        // ใช้ font Prompt สำหรับทั้งแอป
         textTheme: GoogleFonts.promptTextTheme(Theme.of(context).textTheme),
-        scaffoldBackgroundColor: const Color(
-          0xFFF8FAFC,
-        ), // Matches TripsListScreen background
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
         ),
       ),
+
+      // 🌙 Dark Theme
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00BCD4),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+        textTheme: GoogleFonts.promptTextTheme(ThemeData.dark().textTheme),
+        scaffoldBackgroundColor: const Color(0xFF0F172A), // dark background
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+        ),
+      ),
+
       home: const HomeScreen(),
     );
   }
