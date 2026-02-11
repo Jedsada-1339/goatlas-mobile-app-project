@@ -592,10 +592,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           ),
           const SizedBox(height: 16),
           // Hotel
-          if (dayPlan.hotelName != null) ...[
-            _buildHotelItem(dayPlan.hotelName!),
-            const SizedBox(height: 16),
-          ],
+
           // Places
           ...List.generate(
             dayPlan.places.length,
@@ -608,62 +605,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           _buildAddPlaceItem(dayPlan.places.length + 1),
         ],
       ),
-    );
-  }
-
-  Widget _buildHotelItem(String hotelName) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Icon
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white, width: 4),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4),
-            ],
-          ),
-          child: Icon(Icons.hotel, color: primaryColor, size: 20),
-        ),
-        const SizedBox(width: 16),
-        // Content
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'ที่พัก',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF94A3B8),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  hotelName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -685,32 +626,24 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Number Circle
+        // Icon
         Container(
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: typeColor,
-            shape: BoxShape.circle,
+            color: typeColor.withOpacity(0.1),
+            shape: BoxShape.rectangle, // Changed from circle
+            borderRadius: BorderRadius.circular(16), // Rounded corners
             border: Border.all(color: Colors.white, width: 4),
             boxShadow: [
               BoxShadow(
-                color: typeColor.withOpacity(0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 5),
+                color: typeColor.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Center(
-            child: Text(
-              number.toString(),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
+          child: Center(child: Icon(typeIcon, color: typeColor, size: 20)),
         ),
         const SizedBox(width: 16),
         // Content
@@ -718,75 +651,39 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFF8FAFC), // Lighter background
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              // Removed shadow for flatter look
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image
-                CachedImageWithPlaceholder(
-                  imageUrl: place.imageUrl,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  borderRadius: BorderRadius.circular(12),
-                  errorWidget: Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.landscape, color: Colors.grey),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Type Chip
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        margin: const EdgeInsets.only(bottom: 4),
-                        decoration: BoxDecoration(
-                          color: typeColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(typeIcon, size: 10, color: typeColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              typeLabel,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: typeColor,
-                              ),
-                            ),
-                          ],
+                      // Type Label
+                      Text(
+                        typeLabel,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF94A3B8),
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      // Place Name
                       Text(
                         place.name,
                         style: const TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 4),
+                      // Location & Duration
                       Text(
                         '${place.location} • ${place.duration}',
                         style: const TextStyle(
