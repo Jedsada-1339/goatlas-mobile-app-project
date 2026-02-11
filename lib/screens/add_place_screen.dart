@@ -437,82 +437,85 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 color: Color(0xFF0F172A),
               ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CachedImageWithPlaceholder(
-                  imageUrl: place.imageUrl,
-                  width: double.infinity,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  borderRadius: BorderRadius.circular(12),
-                  errorWidget: Container(
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CachedImageWithPlaceholder(
+                    imageUrl: place.imageUrl,
                     width: double.infinity,
                     height: 120,
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.landscape,
-                      size: 40,
-                      color: Colors.grey,
+                    fit: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(12),
+                    errorWidget: Container(
+                      width: double.infinity,
+                      height: 120,
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.landscape,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  place.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${place.location} • ${place.duration}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'ประเภทสถานที่:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildTypeChip(
-                      'attraction',
-                      'ท่องเที่ยว',
-                      Icons.camera_alt,
-                      selectedType == 'attraction',
-                      () => setState(() => selectedType = 'attraction'),
+                  const SizedBox(height: 12),
+                  Text(
+                    place.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F172A),
                     ),
-                    _buildTypeChip(
-                      'restaurant',
-                      'ร้านอาหาร',
-                      Icons.restaurant,
-                      selectedType == 'restaurant',
-                      () => setState(() => selectedType = 'restaurant'),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${place.location} • ${place.duration}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
                     ),
-                    _buildTypeChip(
-                      'accommodation',
-                      'ที่พัก',
-                      Icons.hotel,
-                      selectedType == 'accommodation',
-                      () => setState(() => selectedType = 'accommodation'),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'ประเภทสถานที่:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F172A),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildTypeChip(
+                        'attraction',
+                        'ท่องเที่ยว',
+                        Icons.camera_alt,
+                        selectedType == 'attraction',
+                        () => setState(() => selectedType = 'attraction'),
+                      ),
+                      _buildTypeChip(
+                        'restaurant',
+                        'ร้านอาหาร',
+                        Icons.restaurant,
+                        selectedType == 'restaurant',
+                        () => setState(() => selectedType = 'restaurant'),
+                      ),
+                      _buildTypeChip(
+                        'accommodation',
+                        'ที่พัก',
+                        Icons.hotel,
+                        selectedType == 'accommodation',
+                        () => setState(() => selectedType = 'accommodation'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
