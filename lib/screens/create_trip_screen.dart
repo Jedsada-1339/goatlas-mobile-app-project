@@ -668,6 +668,20 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   }
 
   Widget _buildPlaceItem(PlaceModel place, int number) {
+    IconData typeIcon = Icons.camera_alt;
+    Color typeColor = primaryColor;
+    String typeLabel = 'ท่องเที่ยว';
+
+    if (place.placeType == 'restaurant') {
+      typeIcon = Icons.restaurant;
+      typeColor = Colors.orange;
+      typeLabel = 'ร้านอาหาร';
+    } else if (place.placeType == 'accommodation') {
+      typeIcon = Icons.hotel;
+      typeColor = Colors.indigo;
+      typeLabel = 'ที่พัก';
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -676,12 +690,12 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: primaryColor,
+            color: typeColor,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 4),
             boxShadow: [
               BoxShadow(
-                color: primaryColor.withOpacity(0.2),
+                color: typeColor.withOpacity(0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 5),
               ),
@@ -737,6 +751,33 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Type Chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        margin: const EdgeInsets.only(bottom: 4),
+                        decoration: BoxDecoration(
+                          color: typeColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(typeIcon, size: 10, color: typeColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              typeLabel,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: typeColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       Text(
                         place.name,
                         style: const TextStyle(

@@ -15,7 +15,6 @@ class MyApp extends StatelessWidget {
       title: 'Travel App',
       debugShowCheckedModeBanner: false,
 
-      // ✅ ให้ระบบเลือกตาม device (light/dark)
       themeMode: ThemeMode.system,
 
       // 🌞 Light Theme
@@ -24,6 +23,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF00BCD4),
           brightness: Brightness.light,
+          primary: const Color(0xFF00BCD4),
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.promptTextTheme(Theme.of(context).textTheme),
@@ -41,6 +41,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF00BCD4),
           brightness: Brightness.dark,
+          primary: const Color(0xFF00BCD4),
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.promptTextTheme(ThemeData.dark().textTheme),
