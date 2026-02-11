@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goatlas/components/trip_card.dart';
+import 'package:goatlas/screens/blog_information_screen.dart';
 import '../models/destination.dart';
 import '../models/trip.dart';
 import '../models/blog_model.dart';
@@ -474,6 +475,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 post: post,
                                 onTap: () {
                                   // Navigate to blog detail
+                                  // TODO: ไปหน้ารายละเอียดบทความ
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          BlogInformationScreen(post: post),
+                                    ),
+                                  );
                                 },
                                 showPostImage: false,
                               );
