@@ -13,7 +13,7 @@ class SampleData {
       description:
           'วัดสำคัญคู่เมืองเชียงใหม่ ตั้งอยู่บนดอยสุเทพ มีพระธาตุสีทองอร่าม',
       category: 'ท่องเที่ยว',
-      imageUrl: 'https://images.unsplash.com/photo-1512553785840-eeaffc1fcf8c',
+      imageUrl: 'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648',
       location: 'เชียงใหม่',
       rating: 4.9,
       duration: '2-3 ชม.',
@@ -227,7 +227,7 @@ class SampleData {
       id: 't1',
       name: 'เชียงใหม่ 3 วัน 2 คืน',
       coverImageUrl:
-          'https://images.unsplash.com/photo-1512553785840-eeaffc1fcf8c',
+          'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648',
       startDate: DateTime(2025, 8, 15),
       endDate: DateTime(2025, 8, 17),
       isFavorite: true,

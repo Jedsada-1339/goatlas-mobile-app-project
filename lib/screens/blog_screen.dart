@@ -98,166 +98,227 @@ class BlogScreen extends StatelessWidget {
     final blogPosts = _getSampleBlogPosts();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'บล็อก',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.black87),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: เพิ่มฟังก์ชันค้นหา
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: เพิ่มฟังก์ชันกรอง
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: MediaQuery.of(context).size.width,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'บทความแนะนำ',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Section
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      width: MediaQuery.of(context).size.width,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'บทความแนะนำ',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'เรื่องราวและประสบการณ์การเดินทางจากนักเดินทาง',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'เรื่องราวและประสบการณ์การเดินทางจากนักเดินทาง',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ),
 
-            const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-            // Horizontal Featured Posts
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'บทความยอดนิยม',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // TODO: ดูทั้งหมด
-                        },
-                        child: const Text('ดูทั้งหมด'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 400,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: blogPosts.length,
-                      itemBuilder: (context, index) {
-                        return BlogCard(
-                          post: blogPosts[index],
-                          onTap: () {
-                            // TODO: ไปหน้ารายละเอียดบทความ
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BlogInformationScreen(
+                    // Horizontal Featured Posts
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'บทความยอดนิยม',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  // TODO: ดูทั้งหมด
+                                },
+                                child: const Text('ดูทั้งหมด'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 400,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: blogPosts.length,
+                              itemBuilder: (context, index) {
+                                return BlogCard(
                                   post: blogPosts[index],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                                  onTap: () {
+                                    // TODO: ไปหน้ารายละเอียดบทความ
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            BlogInformationScreen(
+                                              post: blogPosts[index],
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 24),
+
+                    // Recent Posts Grid/List
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'บทความล่าสุด',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: blogPosts.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: BlogCard(
+                                  post: blogPosts[index],
+                                  width: double.infinity,
+                                  margin: EdgeInsets.zero,
+                                  onTap: () {
+                                    // TODO: ไปหน้ารายละเอียดบทความ
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'เปิดบทความ: ${blogPosts[index].title}',
+                                        ),
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 80), // Space for bottom nav
+                  ],
+                ),
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            // Recent Posts Grid/List
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'บทความล่าสุด',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: blogPosts.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: BlogCard(
-                          post: blogPosts[index],
-                          width: double.infinity,
-                          onTap: () {
-                            // TODO: ไปหน้ารายละเอียดบทความ
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'เปิดบทความ: ${blogPosts[index].title}',
-                                ),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 80), // Space for bottom nav
           ],
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Back Button (or Logo/Menu if main tab)
+          // Since this is a main tab, we might want to hide the back button or change it.
+          // However, to match "TripsListScreen" exact style as requested:
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  // If it's a tab, maybe do nothing or go home?
+                  // Providing basic back functionality if pushed, else generic icon
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
+                },
+                child: Icon(
+                  Navigator.canPop(context)
+                      ? Icons.chevron_left
+                      : Icons.article_outlined,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+            ),
+          ),
+          // Title
+          const Text(
+            'บทความ',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          // Search/Filter Options (matches "More Options" position)
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      // Search action
+                    },
+                    child: const Icon(Icons.search, color: Color(0xFF64748B)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
