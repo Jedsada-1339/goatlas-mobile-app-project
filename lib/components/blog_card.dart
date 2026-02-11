@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/blog_post.dart';
+import '../models/blog_model.dart';
 
 class BlogCard extends StatelessWidget {
   final BlogPost post;
@@ -30,6 +30,50 @@ class BlogCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Cover Image - สามารถแก้ไข URL ภาพได้ภายหลัง
+            if (post.coverImage.isNotEmpty)
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: Image.network(
+                  post.coverImage,
+                  width: width,
+                  height: 180,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // แสดงพื้นหลังสีเทาถ้าโหลดรูปไม่ได้
+                    return Container(
+                      width: width,
+                      height: 180,
+                      color: Colors.grey[300],
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 50,
+                        color: Colors.grey[500],
+                      ),
+                    );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: width,
+                      height: 180,
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
             // Content
             Padding(
               padding: const EdgeInsets.all(16),
@@ -100,14 +144,17 @@ class BlogCard extends StatelessWidget {
                       // Author Avatar
                       CircleAvatar(
                         radius: 16,
-                        backgroundImage: NetworkImage(post.authorAvatar),
-                        onBackgroundImageError: (_, __) {},
+                        backgroundImage: post.authorAvatar.isNotEmpty
+                            ? NetworkImage(post.authorAvatar)
+                            : null,
+                        backgroundColor: const Color(0xFF00BCD4),
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName[0].toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
+                                  color: Colors.white,
                                 ),
                               )
                             : null,
