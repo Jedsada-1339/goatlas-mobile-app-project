@@ -5,9 +5,15 @@ class BlogCard extends StatelessWidget {
   final BlogPost post;
   final VoidCallback? onTap;
   final double width;
+  final bool showPostImage;
 
-  const BlogCard({Key? key, required this.post, this.onTap, this.width = 320})
-    : super(key: key);
+  const BlogCard({
+    Key? key,
+    required this.post,
+    this.onTap,
+    this.width = 320,
+    this.showPostImage = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +27,7 @@ class BlogCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: const Color.fromARGB(255, 137, 82, 82).withOpacity(0.08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -31,7 +37,7 @@ class BlogCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Cover Image - สามารถแก้ไข URL ภาพได้ภายหลัง
-            if (post.coverImage.isNotEmpty)
+            if (showPostImage && post.coverImage.isNotEmpty)
               ClipRRect(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),

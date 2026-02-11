@@ -475,6 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onTap: () {
                                   // Navigate to blog detail
                                 },
+                                showPostImage: false,
                               );
                             },
                           ),
