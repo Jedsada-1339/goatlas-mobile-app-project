@@ -10,6 +10,7 @@ class PlaceModel {
   final String duration;
   final double? latitude;
   final double? longitude;
+  final String placeType; // 'accommodation', 'restaurant', 'attraction'
 
   PlaceModel({
     required this.id,
@@ -22,6 +23,7 @@ class PlaceModel {
     this.duration = '1-2 ชม.',
     this.latitude,
     this.longitude,
+    this.placeType = 'attraction',
   });
 
   PlaceModel copyWith({
@@ -35,6 +37,7 @@ class PlaceModel {
     String? duration,
     double? latitude,
     double? longitude,
+    String? placeType,
   }) {
     return PlaceModel(
       id: id ?? this.id,
@@ -47,6 +50,7 @@ class PlaceModel {
       duration: duration ?? this.duration,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      placeType: placeType ?? this.placeType,
     );
   }
 
@@ -62,6 +66,7 @@ class PlaceModel {
       'duration': duration,
       'latitude': latitude,
       'longitude': longitude,
+      'placeType': placeType,
     };
   }
 
@@ -77,6 +82,7 @@ class PlaceModel {
       duration: map['duration'] ?? '1-2 ชม.',
       latitude: map['latitude']?.toDouble(),
       longitude: map['longitude']?.toDouble(),
+      placeType: map['placeType'] ?? 'attraction',
     );
   }
 }

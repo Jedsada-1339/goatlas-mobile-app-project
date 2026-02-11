@@ -409,91 +409,188 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   void _showAddConfirmation(PlaceModel place) {
+    // กำหนดค่าเริ่มต้นตามหมวดหมู่ (ถ้ามี)
+    String selectedType = 'attraction';
+    if (place.category.contains('อาหาร') ||
+        place.category.contains('คาเฟ่') ||
+        place.category == 'ร้านอาหาร') {
+      selectedType = 'restaurant';
+    } else if (place.category.contains('พัก') ||
+        place.category.contains('โรงแรม') ||
+        place.category == 'ที่พัก') {
+      selectedType = 'accommodation';
+    }
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text(
-          'เพิ่มสถานที่',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CachedImageWithPlaceholder(
-              imageUrl: place.imageUrl,
-              width: double.infinity,
-              height: 120,
-              fit: BoxFit.cover,
-              borderRadius: BorderRadius.circular(12),
-              errorWidget: Container(
-                width: double.infinity,
-                height: 120,
-                color: Colors.grey[300],
-                child: const Icon(
-                  Icons.landscape,
-                  size: 40,
-                  color: Colors.grey,
-                ),
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
             ),
-            const SizedBox(height: 12),
-            Text(
-              place.name,
-              style: const TextStyle(
-                fontSize: 16,
+            title: const Text(
+              'เพิ่มสถานที่',
+              style: TextStyle(
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF0F172A),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '${place.location} • ${place.duration}',
-              style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CachedImageWithPlaceholder(
+                  imageUrl: place.imageUrl,
+                  width: double.infinity,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(12),
+                  errorWidget: Container(
+                    width: double.infinity,
+                    height: 120,
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.landscape,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  place.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${place.location} • ${place.duration}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'ประเภทสถานที่:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildTypeChip(
+                      'attraction',
+                      'ท่องเที่ยว',
+                      Icons.camera_alt,
+                      selectedType == 'attraction',
+                      () => setState(() => selectedType = 'attraction'),
+                    ),
+                    _buildTypeChip(
+                      'restaurant',
+                      'ร้านอาหาร',
+                      Icons.restaurant,
+                      selectedType == 'restaurant',
+                      () => setState(() => selectedType = 'restaurant'),
+                    ),
+                    _buildTypeChip(
+                      'accommodation',
+                      'ที่พัก',
+                      Icons.hotel,
+                      selectedType == 'accommodation',
+                      () => setState(() => selectedType = 'accommodation'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'ยกเลิก',
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // ส่งข้อมูลสถานที่กลับไปยังหน้าก่อนหน้า พร้อมประเภทที่เลือก
+                  Navigator.pop(
+                    context,
+                    place.copyWith(placeType: selectedType),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'เพิ่มสถานที่',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTypeChip(
+    String type,
+    String label,
+    IconData icon,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? primaryColor : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected
+              ? null
+              : Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : const Color(0xFF64748B),
+            ),
+            const SizedBox(width: 4),
             Text(
-              'ต้องการเพิ่มสถานที่นี้ไปยังทริปของคุณหรือไม่?',
-              style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xFF64748B),
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'ยกเลิก',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // ส่งข้อมูลสถานที่กลับไปยังหน้าก่อนหน้า
-              Navigator.pop(context, place);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'เพิ่มสถานที่',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
       ),
     );
   }
