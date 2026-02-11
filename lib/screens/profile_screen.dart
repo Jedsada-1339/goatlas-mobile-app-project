@@ -3,7 +3,7 @@ import '../components/custom_bottom_nav_bar.dart';
 import '../components/trip_card.dart';
 import '../components/blog_card.dart';
 import '../models/trip.dart';
-import '../models/blog_post.dart';
+import '../models/blog_model.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
