@@ -5,6 +5,7 @@ class BlogCard extends StatelessWidget {
   final BlogPost post;
   final VoidCallback? onTap;
   final double width;
+  final bool showPostImage;
   final EdgeInsetsGeometry? margin;
 
   const BlogCard({
@@ -12,6 +13,7 @@ class BlogCard extends StatelessWidget {
     required this.post,
     this.onTap,
     this.width = 320,
+    this.showPostImage = true,
     this.margin,
   }) : super(key: key);
 
@@ -37,7 +39,7 @@ class BlogCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Cover Image - สามารถแก้ไข URL ภาพได้ภายหลัง
-            if (post.coverImage.isNotEmpty)
+            if (showPostImage && post.coverImage.isNotEmpty)
               ClipRRect(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
