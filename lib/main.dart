@@ -15,14 +15,20 @@ class MyApp extends StatelessWidget {
       title: 'Travel App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.cyan,
-        primaryColor: const Color(0xFF00BCD4),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00BCD4),
+          primary: const Color(0xFF00BCD4),
+        ),
+        useMaterial3: true,
         // ใช้ font Prompt สำหรับทั้งแอป
         textTheme: GoogleFonts.promptTextTheme(Theme.of(context).textTheme),
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: const Color(
+          0xFFF8FAFC,
+        ), // Matches TripsListScreen background
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
         ),
       ),
       home: const HomeScreen(),

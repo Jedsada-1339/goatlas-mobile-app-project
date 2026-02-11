@@ -16,6 +16,7 @@ class TripsListScreen extends StatefulWidget {
 class _TripsListScreenState extends State<TripsListScreen> {
   // ใช้ข้อมูลจาก SampleData
   late List<TripModel> _trips;
+  String _selectedCategory = 'ทั้งหมด';
 
   @override
   void initState() {
@@ -70,51 +71,119 @@ class _TripsListScreenState extends State<TripsListScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Back Button
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(
+                      Icons.chevron_left,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ),
+              // Title
+              const Text(
+                'ทริปของฉัน',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.5,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              // More Options
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {},
+                    child: const Icon(
+                      Icons.more_horiz,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Category Chips
+        _buildCategoryChips(),
+      ],
+    );
+  }
+
+  Widget _buildCategoryChips() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Back Button
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.chevron_left, color: Color(0xFF64748B)),
+      color: Colors.white.withOpacity(0.5),
+      height: 60,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        physics: const BouncingScrollPhysics(),
+        itemCount: SampleData.placeCategories.length,
+        itemBuilder: (context, index) {
+          final category = SampleData.placeCategories[index];
+          final isSelected = _selectedCategory == category;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedCategory = category;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected ? primaryColor : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: isSelected
+                      ? null
+                      : Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Center(
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-          // Title
-          const Text(
-            'ทริปของฉัน',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.5,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          // More Options
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {},
-                child: const Icon(Icons.more_horiz, color: Color(0xFF64748B)),
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -194,13 +263,23 @@ class _TripsListScreenState extends State<TripsListScreen> {
           ),
           const SizedBox(height: 16),
           // Trips List
-          ...List.generate(
-            _trips.length,
-            (index) => Padding(
+          ...List.generate(_trips.length, (index) {
+            // Filter Logic
+            if (_selectedCategory != 'ทั้งหมด') {
+              bool hasCategory = _trips[index].dayPlans.any((day) {
+                return day.places.any(
+                  (place) => place.category == _selectedCategory,
+                );
+              });
+
+              if (!hasCategory) return const SizedBox.shrink();
+            }
+
+            return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _buildTripCard(_trips[index], index),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );

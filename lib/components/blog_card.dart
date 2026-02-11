@@ -5,9 +5,15 @@ class BlogCard extends StatelessWidget {
   final BlogPost post;
   final VoidCallback? onTap;
   final double width;
+  final EdgeInsetsGeometry? margin;
 
-  const BlogCard({Key? key, required this.post, this.onTap, this.width = 320})
-    : super(key: key);
+  const BlogCard({
+    Key? key,
+    required this.post,
+    this.onTap,
+    this.width = 320,
+    this.margin,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +21,7 @@ class BlogCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        margin: const EdgeInsets.only(right: 16),
+        margin: margin ?? const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
