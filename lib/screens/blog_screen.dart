@@ -265,25 +265,6 @@ class BlogScreen extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {
-                  // If it's a tab, maybe do nothing or go home?
-                  // Providing basic back functionality if pushed, else generic icon
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  }
-                },
-                child: Icon(
-                  Navigator.canPop(context)
-                      ? Icons.chevron_left
-                      : Icons.article_outlined,
-                  color: const Color(0xFF64748B),
-                ),
-              ),
-            ),
           ),
           // Title
           const Text(

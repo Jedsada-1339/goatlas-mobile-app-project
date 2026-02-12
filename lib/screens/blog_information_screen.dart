@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:goatlas/components/custom_bottom_nav_bar.dart';
+import '../components/cached_image_with_placeholder.dart';
 import '../models/blog_model.dart';
 
 class BlogInformationScreen extends StatelessWidget {
@@ -70,7 +72,7 @@ class BlogInformationScreen extends StatelessWidget {
                       CircleAvatar(
                         radius: 24,
                         backgroundImage: post.authorAvatar.isNotEmpty
-                            ? NetworkImage(post.authorAvatar)
+                            ? CachedNetworkImageProvider(post.authorAvatar)
                             : null,
                         backgroundColor: const Color(0xFF00BCD4),
                         child: post.authorAvatar.isEmpty
@@ -154,22 +156,13 @@ class BlogInformationScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        post.coverImage,
-                        width: double.infinity,
+                      child: SizedBox(
                         height: 240,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 240,
-                            color: Colors.grey[300],
-                            child: Icon(
-                              Icons.image_not_supported,
-                              size: 50,
-                              color: Colors.grey[500],
-                            ),
-                          );
-                        },
+                        width: double.infinity,
+                        child: CachedFullImage(
+                          imageUrl: post.coverImage,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),

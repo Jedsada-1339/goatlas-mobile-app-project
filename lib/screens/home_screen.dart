@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:goatlas/components/trip_card.dart';
 import 'package:goatlas/screens/blog_information_screen.dart';
+import 'package:goatlas/screens/destination_detail_screen.dart';
 import '../models/destination.dart';
 import '../models/trip.dart';
 import '../models/blog_model.dart';
@@ -43,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
       category: 'ยอดนิยม',
       isFavorite: true,
       rating: 4.8,
+      description:
+          'เกาะพีพี เป็นหมู่เกาะกลางทะเลอันดามันที่สวยงามระดับโลก ประกอบด้วย 2 เกาะใหญ่ คือ เกาะพีพีดอน และเกาะพีพีเล มีอ่าวมาหยาที่โด่งดัง น้ำทะเลสีมรกต ทรายขาวละเอียด เหมาะแก่การดำน้ำชมปะการัง',
     ),
     Destination(
       id: '2',
@@ -52,6 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
       category: 'วัฒนธรรม',
       isFavorite: false,
       rating: 4.6,
+      description:
+          'แหล่งมรดกโลกที่ทรงคุณค่า เต็มไปด้วยวัดและโบราณสถานเก่าแก่ที่แสดงถึงความเจริญรุ่งเรืองของอาณาจักรอยุธยาในอดีต ชมความงามของสถาปัตยกรรมไทยโบราณและเรียนรู้ประวัติศาสตร์ชาติไทย',
     ),
     Destination(
       id: '3',
@@ -61,6 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
       category: 'ธรรมชาติ',
       isFavorite: false,
       rating: 4.9,
+      description:
+          'ยอดเขาที่สูงที่สุดในประเทศไทย สัมผัสอากาศหนาวเย็นตลอดทั้งปี ชมทะเลหมอก เดินป่าศึกษาธรรมชาติกิ่วแม่ปาน และสักการะพระมหาธาตุนภเมทนีดลและพระมหาธาตุนภพลภูมิสิริ',
     ),
   ];
 
@@ -207,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(
+                  image: CachedNetworkImageProvider(
                     'https://images.unsplash.com/photo-1559827260-dc66d52bef19',
                   ),
                   fit: BoxFit.cover,
@@ -240,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundImage: NetworkImage(
+                          backgroundImage: CachedNetworkImageProvider(
                             'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
                             // 'https://ui-avatars.com/api/?name=Jedsada&background=00BCD4&color=fff',
                           ),
@@ -378,7 +386,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                       width: 200,
                                       onFavoriteToggle: () =>
                                           _toggleFavorite(realIndex),
-                                      onTap: () {},
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                DestinationDetailScreen(
+                                                  destination: destination,
+                                                ),
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
                                 ),
