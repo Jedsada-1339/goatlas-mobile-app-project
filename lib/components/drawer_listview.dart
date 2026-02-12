@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../screens/profile_screen.dart';
+import '../screens/login_screen.dart';
+import '../screens/faq_support_screen.dart';
 
 class DrawerListview extends StatelessWidget {
   const DrawerListview({Key? key}) : super(key: key);
@@ -134,7 +136,10 @@ class DrawerListview extends StatelessWidget {
                 icon: Icons.help_rounded,
                 label: 'ความช่วยเหลือ',
                 color: const Color(0xFF66BB6A),
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FaqSupportPage()),
+                ),
               ),
 
               const SizedBox(height: 4),
@@ -145,7 +150,10 @@ class DrawerListview extends StatelessWidget {
                 icon: Icons.logout_rounded,
                 label: 'ออกจากระบบ',
                 color: const Color(0xFFEF5350),
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                ),
                 isLogout: true,
               ),
               const SizedBox(height: 12),

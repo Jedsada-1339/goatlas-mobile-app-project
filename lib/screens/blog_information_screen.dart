@@ -93,6 +93,15 @@ class BlogInformationScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              'By ${post.authorName}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                             Row(
                               children: [
                                 Text(
@@ -133,15 +142,6 @@ class BlogInformationScreen extends StatelessWidget {
                                     ),
                                   ),
                               ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'By ${post.authorName}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
                             ),
                           ],
                         ),
