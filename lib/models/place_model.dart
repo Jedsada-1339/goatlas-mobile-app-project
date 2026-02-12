@@ -11,6 +11,7 @@ class PlaceModel {
   final double? latitude;
   final double? longitude;
   final String placeType; // 'accommodation', 'restaurant', 'attraction'
+  final bool isVisited;
 
   PlaceModel({
     required this.id,
@@ -24,6 +25,7 @@ class PlaceModel {
     this.latitude,
     this.longitude,
     this.placeType = 'attraction',
+    this.isVisited = false,
   });
 
   PlaceModel copyWith({
@@ -38,6 +40,7 @@ class PlaceModel {
     double? latitude,
     double? longitude,
     String? placeType,
+    bool? isVisited,
   }) {
     return PlaceModel(
       id: id ?? this.id,
@@ -51,6 +54,7 @@ class PlaceModel {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       placeType: placeType ?? this.placeType,
+      isVisited: isVisited ?? this.isVisited,
     );
   }
 
@@ -67,6 +71,7 @@ class PlaceModel {
       'latitude': latitude,
       'longitude': longitude,
       'placeType': placeType,
+      'isVisited': isVisited,
     };
   }
 
@@ -83,6 +88,7 @@ class PlaceModel {
       latitude: map['latitude']?.toDouble(),
       longitude: map['longitude']?.toDouble(),
       placeType: map['placeType'] ?? 'attraction',
+      isVisited: map['isVisited'] ?? false,
     );
   }
 }

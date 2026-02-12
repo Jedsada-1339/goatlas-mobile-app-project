@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../screens/profile_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/faq_support_screen.dart';
@@ -35,7 +36,7 @@ class DrawerListview extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2.5),
                     image: const DecorationImage(
-                      image: NetworkImage(
+                      image: CachedNetworkImageProvider(
                         'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
                       ),
                       fit: BoxFit.cover,

@@ -6,6 +6,7 @@ class Destination {
   final String category;
   final bool isFavorite;
   final double rating;
+  final String description;
 
   Destination({
     required this.id,
@@ -15,6 +16,7 @@ class Destination {
     required this.category,
     this.isFavorite = false,
     this.rating = 0.0,
+    this.description = '',
   });
 
   Destination copyWith({
@@ -25,6 +27,7 @@ class Destination {
     String? category,
     bool? isFavorite,
     double? rating,
+    String? description,
   }) {
     return Destination(
       id: id ?? this.id,
@@ -34,6 +37,7 @@ class Destination {
       category: category ?? this.category,
       isFavorite: isFavorite ?? this.isFavorite,
       rating: rating ?? this.rating,
+      description: description ?? this.description,
     );
   }
 }

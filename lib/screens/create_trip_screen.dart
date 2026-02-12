@@ -21,6 +21,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   final TextEditingController _tripNameController = TextEditingController();
   late TripModel _currentTrip;
   bool _isEditing = false;
+  DateTimeRange? _selectedDateRange;
 
   Color get primaryColor => Theme.of(context).primaryColor;
 
@@ -31,6 +32,12 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       _currentTrip = widget.trip!;
       _tripNameController.text = _currentTrip.name;
       _isEditing = true;
+      if (_currentTrip.startDate != null && _currentTrip.endDate != null) {
+        _selectedDateRange = DateTimeRange(
+          start: _currentTrip.startDate!,
+          end: _currentTrip.endDate!,
+        );
+      }
     } else {
       // สร้างทริปใหม่พร้อม 3 วันเริ่มต้น
       _currentTrip = TripModel(
@@ -102,6 +109,77 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     setState(() {
       _currentTrip = _currentTrip.removePlaceFromDay(_selectedDay, placeId);
     });
+  }
+
+  Future<void> _selectDates() async {
+    final DateTime now = DateTime.now();
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now.add(const Duration(days: 365 * 2)),
+      initialDateRange: _selectedDateRange,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: primaryColor,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: const Color(0xFF0F172A),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDateRange = picked;
+        _currentTrip = _currentTrip.copyWith(
+          startDate: picked.start,
+          endDate: picked.end,
+        );
+
+        final duration = picked.end.difference(picked.start).inDays + 1;
+        _updateTripDuration(duration);
+      });
+    }
+  }
+
+  void _updateTripDuration(int newDuration) {
+    int currentDuration = _currentTrip.dayPlans.length;
+    if (newDuration > currentDuration) {
+      for (int i = 0; i < newDuration - currentDuration; i++) {
+        _currentTrip = _currentTrip.addDay();
+      }
+    } else if (newDuration < currentDuration) {
+      for (int i = 0; i < currentDuration - newDuration; i++) {
+        _currentTrip = _currentTrip.removeDay(_currentTrip.dayPlans.length);
+      }
+      if (_selectedDay > _currentTrip.dayPlans.length) {
+        _selectedDay = _currentTrip.dayPlans.length;
+      }
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final thaiMonths = [
+      '',
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.',
+    ];
+    return '${date.day} ${thaiMonths[date.month]}';
   }
 
   void _saveTrip() {
@@ -336,6 +414,49 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          // Date Picker
+          GestureDetector(
+            onTap: _selectDates,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.transparent),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    color: _currentTrip.startDate != null
+                        ? primaryColor
+                        : const Color(0xFF94A3B8),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    _currentTrip.dateRangeText,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: _currentTrip.startDate != null
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFF94A3B8),
+                      fontWeight: _currentTrip.startDate != null
+                          ? FontWeight.w500
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFF94A3B8),
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -402,14 +523,20 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'วันที่',
+                    _currentTrip.startDate != null
+                        ? _formatDate(
+                            _currentTrip.startDate!.add(
+                              Duration(days: day - 1),
+                            ),
+                          )
+                        : 'วันที่',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: isSelected
                           ? Colors.white.withOpacity(0.8)
                           : const Color(0xFF94A3B8),
-                      letterSpacing: 2,
+                      letterSpacing: 1, // Reduced spacing
                     ),
                   ),
                   const SizedBox(height: 4),
