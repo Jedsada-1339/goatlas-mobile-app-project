@@ -67,38 +67,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     return DayPlanModel(dayNumber: _selectedDay);
   }
 
-  void _addDay() {
-    setState(() {
-      _currentTrip = _currentTrip.addDay();
-    });
-  }
-
-  void _removeDay(int dayNumber) {
-    if (_currentTrip.dayPlans.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('ไม่สามารถลบได้ ทริปต้องมีอย่างน้อย 1 วัน'),
-          backgroundColor: Color(0xFFEF4444),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _currentTrip = _currentTrip.removeDay(dayNumber);
-      if (_selectedDay > _currentTrip.dayPlans.length) {
-        _selectedDay = _currentTrip.dayPlans.length;
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('ลบวันที่ $dayNumber เรียบร้อยแล้ว'),
-        backgroundColor: primaryColor,
-      ),
-    );
-  }
-
   void _addPlaceToCurrentDay(PlaceModel place) {
     setState(() {
       _currentTrip = _currentTrip.addPlaceToDay(_selectedDay, place);
@@ -469,12 +437,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         physics: const BouncingScrollPhysics(),
-        itemCount: _currentTrip.dayPlans.length + 1, // +1 for Add button
+        itemCount: _currentTrip.dayPlans.length,
         itemBuilder: (context, index) {
-          if (index == _currentTrip.dayPlans.length) {
-            // Add Day Button
-            return _buildAddDayButton();
-          }
           return _buildDayItem(index + 1);
         },
       ),
@@ -491,9 +455,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         setState(() {
           _selectedDay = day;
         });
-      },
-      onLongPress: () {
-        _showDeleteDayDialog(day);
       },
       child: Container(
         width: 96,
@@ -562,127 +523,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                       ),
                     ),
                 ],
-              ),
-            ),
-            // Delete Button (only show if more than 1 day)
-            if (_currentTrip.dayPlans.length > 1)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: GestureDetector(
-                  onTap: () => _showDeleteDayDialog(day),
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.white.withOpacity(0.2)
-                          : const Color(0xFFE2E8F0),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 14,
-                      color: isSelected
-                          ? Colors.white.withOpacity(0.8)
-                          : const Color(0xFF94A3B8),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteDayDialog(int day) {
-    if (_currentTrip.dayPlans.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('ไม่สามารถลบได้ ทริปต้องมีอย่างน้อย 1 วัน'),
-          backgroundColor: Color(0xFFEF4444),
-        ),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text(
-          'ลบวัน',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        content: Text(
-          'ต้องการลบวันที่ $day หรือไม่?\nสถานที่ทั้งหมดในวันนี้จะถูกลบด้วย',
-          style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'ยกเลิก',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _removeDay(day);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'ลบ',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddDayButton() {
-    return GestureDetector(
-      onTap: _addDay,
-      child: Container(
-        width: 96,
-        height: 96,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFFE2E8F0),
-            width: 2,
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.add, size: 28, color: Color(0xFFCBD5E1)),
-            const SizedBox(height: 4),
-            Text(
-              'เพิ่มวัน',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[400],
               ),
             ),
           ],
