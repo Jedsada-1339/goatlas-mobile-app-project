@@ -17,6 +17,8 @@ class SampleData {
       location: 'เชียงใหม่',
       rating: 4.9,
       duration: '2-3 ชม.',
+      latitude: 18.8049,
+      longitude: 98.9218,
     ),
     PlaceModel(
       id: 'p2',
@@ -27,6 +29,8 @@ class SampleData {
       location: 'เชียงใหม่',
       rating: 4.8,
       duration: 'ครึ่งวัน',
+      latitude: 18.5885,
+      longitude: 98.4870,
     ),
     PlaceModel(
       id: 'p3',
@@ -37,6 +41,8 @@ class SampleData {
       location: 'เชียงใหม่',
       rating: 4.6,
       duration: '2-3 ชม.',
+      latitude: 18.7877,
+      longitude: 98.9932,
     ),
     PlaceModel(
       id: 'p4',
@@ -47,6 +53,8 @@ class SampleData {
       location: 'เชียงใหม่',
       rating: 4.7,
       duration: '1 ชม.',
+      latitude: 18.8023,
+      longitude: 98.9733,
     ),
     PlaceModel(
       id: 'p5',
@@ -58,6 +66,8 @@ class SampleData {
       location: 'เชียงราย',
       rating: 4.9,
       duration: '1-2 ชม.',
+      latitude: 19.8242,
+      longitude: 99.7630,
     ),
 
     // ภาคใต้
@@ -70,6 +80,8 @@ class SampleData {
       location: 'กระบี่',
       rating: 4.8,
       duration: 'ทั้งวัน',
+      latitude: 7.7407,
+      longitude: 98.7784,
     ),
     PlaceModel(
       id: 'p7',
@@ -80,6 +92,8 @@ class SampleData {
       location: 'ภูเก็ต',
       rating: 4.5,
       duration: 'ครึ่งวัน',
+      latitude: 7.8967,
+      longitude: 98.2952,
     ),
     PlaceModel(
       id: 'p8',
@@ -90,6 +104,8 @@ class SampleData {
       location: 'พังงา',
       rating: 4.7,
       duration: 'ครึ่งวัน',
+      latitude: 8.3248,
+      longitude: 98.6015,
     ),
     PlaceModel(
       id: 'p9',
@@ -100,6 +116,8 @@ class SampleData {
       location: 'ภูเก็ต',
       rating: 4.6,
       duration: '1 ชม.',
+      latitude: 7.8804,
+      longitude: 98.3923,
     ),
 
     // ภาคกลาง
@@ -112,6 +130,8 @@ class SampleData {
       location: 'กรุงเทพฯ',
       rating: 4.9,
       duration: '2-3 ชม.',
+      latitude: 13.7517,
+      longitude: 100.4926,
     ),
     PlaceModel(
       id: 'p11',
@@ -122,6 +142,8 @@ class SampleData {
       location: 'สมุทรสงคราม',
       rating: 4.7,
       duration: 'ครึ่งวัน',
+      latitude: 13.4260,
+      longitude: 99.9547,
     ),
     PlaceModel(
       id: 'p12',
@@ -132,6 +154,8 @@ class SampleData {
       location: 'อยุธยา',
       rating: 4.8,
       duration: 'ครึ่งวัน',
+      latitude: 14.3532,
+      longitude: 100.5684,
     ),
     PlaceModel(
       id: 'p13',
@@ -142,6 +166,8 @@ class SampleData {
       location: 'กรุงเทพฯ',
       rating: 4.6,
       duration: '3-4 ชม.',
+      latitude: 13.7268,
+      longitude: 100.5108,
     ),
     PlaceModel(
       id: 'p14',
@@ -152,6 +178,8 @@ class SampleData {
       location: 'กรุงเทพฯ',
       rating: 4.5,
       duration: '2-3 ชม.',
+      latitude: 13.7408,
+      longitude: 100.5085,
     ),
 
     // ภาคอีสาน
@@ -164,6 +192,8 @@ class SampleData {
       location: 'เลย',
       rating: 4.8,
       duration: 'ทั้งวัน',
+      latitude: 16.8837,
+      longitude: 101.7877,
     ),
     PlaceModel(
       id: 'p16',
@@ -174,6 +204,8 @@ class SampleData {
       location: 'เพชรบูรณ์',
       rating: 4.7,
       duration: 'ครึ่งวัน',
+      latitude: 16.9030,
+      longitude: 101.0971,
     ),
 
     // ที่พัก
@@ -186,6 +218,8 @@ class SampleData {
       location: 'เชียงใหม่',
       rating: 4.9,
       duration: 'พักค้างคืน',
+      latitude: 18.7788,
+      longitude: 99.0347,
     ),
     PlaceModel(
       id: 'p18',
@@ -196,6 +230,8 @@ class SampleData {
       location: 'ภูเก็ต',
       rating: 4.8,
       duration: 'พักค้างคืน',
+      latitude: 7.9515,
+      longitude: 98.2858,
     ),
 
     // คาเฟ่
@@ -208,6 +244,8 @@ class SampleData {
       location: 'เชียงใหม่',
       rating: 4.6,
       duration: '1-2 ชม.',
+      latitude: 18.9351,
+      longitude: 98.8223,
     ),
     PlaceModel(
       id: 'p20',
@@ -218,6 +256,8 @@ class SampleData {
       location: 'เขาใหญ่',
       rating: 4.5,
       duration: '1-2 ชม.',
+      latitude: 14.5492,
+      longitude: 101.3725,
     ),
   ];
 
@@ -236,16 +276,19 @@ class SampleData {
           dayNumber: 1,
           hotelName: 'โรงแรมดาราเทวี',
           places: [
-            places.firstWhere((p) => p.id == 'p1'),
-            places.firstWhere((p) => p.id == 'p4'),
+            places.firstWhere((p) => p.id == 'p1'), // วัดพระธาตุดอยสุเทพ
+            places.firstWhere((p) => p.id == 'p19'), // ม่อนแจ่ม คาเฟ่
+            places.firstWhere((p) => p.id == 'p4'), // ร้านข้าวซอยแม่สาย
+            places.firstWhere((p) => p.id == 'p3'), // ถนนคนเดินท่าแพ
           ],
         ),
         DayPlanModel(
           dayNumber: 2,
           hotelName: 'โรงแรมดาราเทวี',
           places: [
-            places.firstWhere((p) => p.id == 'p2'),
-            places.firstWhere((p) => p.id == 'p19'),
+            places.firstWhere((p) => p.id == 'p17'), // โรงแรม
+            places.firstWhere((p) => p.id == 'p2'), // ดอยอินทนนท์
+            places.firstWhere((p) => p.id == 'p19'), // ม่อนแจ่ม
           ],
         ),
         DayPlanModel(
@@ -265,7 +308,11 @@ class SampleData {
         DayPlanModel(
           dayNumber: 1,
           hotelName: 'รีสอร์ทริมหาด',
-          places: [places.firstWhere((p) => p.id == 'p7')],
+          places: [
+            places.firstWhere((p) => p.id == 'p18'), // รีสอร์ท
+            places.firstWhere((p) => p.id == 'p7'), // หาดป่าตอง
+            places.firstWhere((p) => p.id == 'p9'), // ร้านอาหาร
+          ],
         ),
         DayPlanModel(
           dayNumber: 2,
