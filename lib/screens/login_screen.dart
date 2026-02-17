@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
+import '../utills/firebase_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -13,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _firebaseService = FirebaseService(); // เพิ่มบรรทัดนี้
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -29,27 +32,59 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = true;
       });
 
-      // จำลองการเรียก API
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // แสดง SnackBar และนำทางไปหน้า Home
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('เข้าสู่ระบบสำเร็จ'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
+      try {
+        // Login with Firebase
+        await _firebaseService.signInWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
         );
 
-        // นำทางไปหน้า Home
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('เข้าสู่ระบบสำเร็จ'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = 'เกิดข้อผิดพลาด';
+
+        if (e.code == 'user-not-found') {
+          errorMessage = 'ไม่พบผู้ใช้งานนี้';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'รหัสผ่านไม่ถูกต้อง';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+        } else if (e.code == 'user-disabled') {
+          errorMessage = 'บัญชีนี้ถูกระงับ';
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }

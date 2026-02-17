@@ -1,11 +1,46 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../screens/profile_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/faq_support_screen.dart';
+import '../utills/firebase_service.dart';
 
-class DrawerListview extends StatelessWidget {
+import 'package:firebase_auth/firebase_auth.dart'; // เพิ่ม import สำหรับ FirebaseAuth
+
+class DrawerListview extends StatefulWidget {
   const DrawerListview({Key? key}) : super(key: key);
+
+  @override
+  State<DrawerListview> createState() => _DrawerListviewState();
+}
+
+class _DrawerListviewState extends State<DrawerListview> {
+  String _email = '';
+  String _username = 'ผู้ใช้งาน';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (mounted) {
+        setState(() {
+          _email = user.email ?? 'email ไม่ระบุ';
+          _username = doc.data()?['username'] ?? 'ผู้ใช้งาน';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +70,9 @@ class DrawerListview extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2.5),
-                    image: const DecorationImage(
+                    image: DecorationImage(
                       image: CachedNetworkImageProvider(
-                        'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
+                        'https://ui-avatars.com/api/?name={$_username}&background=00BCD4&color=fff',
                       ),
                       fit: BoxFit.cover,
                     ),
@@ -45,8 +80,8 @@ class DrawerListview extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 // Name
-                const Text(
-                  'Carl Johnson',
+                Text(
+                  '$_username',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -55,8 +90,8 @@ class DrawerListview extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 // Email
-                const Text(
-                  'carl.johnson@email.com',
+                Text(
+                  '$_email',
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
                 const SizedBox(height: 16),
@@ -150,10 +185,18 @@ class DrawerListview extends StatelessWidget {
                 icon: Icons.logout_rounded,
                 label: 'ออกจากระบบ',
                 color: const Color(0xFFEF5350),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                ),
+                onTap: () async {
+                  await FirebaseService().signOut();
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                      (route) => false,
+                    );
+                  }
+                },
                 isLogout: true,
               ),
               const SizedBox(height: 12),
