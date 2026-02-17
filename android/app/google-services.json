@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "534980312634",
+    "firebase_url": "https://goatlas-database-moblieapp-kku-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "goatlas-database-moblieapp-kku",
+    "storage_bucket": "goatlas-database-moblieapp-kku.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534980312634:android:11c0691f706a4a3dfc3f03",
+        "android_client_info": {
+          "package_name": "com.example.goatlas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8jQevD6uNN2KB_I9Zzt2A7LZa76V9_iI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

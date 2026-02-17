@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import '../utills/firebase_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -10,18 +12,18 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _usernameController = TextEditingController(); // เพิ่มบรรทัดนี้
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _firebaseService = FirebaseService(); // เพิ่มบรรทัดนี้
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
-  bool _acceptTerms = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _usernameController.dispose(); // เพิ่มบรรทัดนี้
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -30,41 +32,62 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
-      if (!_acceptTerms) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('กรุณายอมรับข้อกำหนดและเงื่อนไข'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-        return;
-      }
-
       setState(() {
         _isLoading = true;
       });
 
-      // จำลองการเรียก API
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // แสดง SnackBar และนำทางไปหน้า Home
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('สมัครสมาชิกสำเร็จ'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
+      try {
+        // Register with Firebase
+        await _firebaseService.registerWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+          _usernameController.text.trim(),
         );
 
-        // นำทางไปหน้า Home
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('สมัครสมาชิกสำเร็จ'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = 'เกิดข้อผิดพลาด';
+
+        if (e.code == 'weak-password') {
+          errorMessage = 'รหัสผ่านไม่แข็งแรงพอ';
+        } else if (e.code == 'email-already-in-use') {
+          errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -122,13 +145,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 40),
 
                   // Name TextField
+                  // Username TextField
                   TextFormField(
-                    controller: _nameController,
-                    keyboardType: TextInputType.name,
-                    textCapitalization: TextCapitalization.words,
+                    controller: _usernameController,
                     decoration: InputDecoration(
-                      labelText: 'ชื่อ-นามสกุล',
-                      hintText: 'กรอกชื่อและนามสกุล',
+                      labelText: 'ชื่อผู้ใช้',
+                      hintText: 'กรอกชื่อผู้ใช้ของคุณ',
                       prefixIcon: Icon(
                         Icons.person_outlined,
                         color: colorScheme.primary,
@@ -157,10 +179,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'กรุณากรอกชื่อ-นามสกุล';
+                        return 'กรุณากรอกชื่อผู้ใช้';
                       }
                       if (value.length < 3) {
-                        return 'ชื่อต้องมีอย่างน้อย 3 ตัวอักษร';
+                        return 'ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร';
                       }
                       return null;
                     },
@@ -329,54 +351,54 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16),
 
                   // ยอมรับข้อกำหนด
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _acceptTerms,
-                        onChanged: (value) {
-                          setState(() {
-                            _acceptTerms = value ?? false;
-                          });
-                        },
-                        activeColor: colorScheme.primary,
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _acceptTerms = !_acceptTerms;
-                            });
-                          },
-                          child: RichText(
-                            text: TextSpan(
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              children: [
-                                const TextSpan(text: 'ฉันยอมรับ '),
-                                TextSpan(
-                                  text: 'ข้อกำหนดและเงื่อนไข',
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const TextSpan(text: ' และ '),
-                                TextSpan(
-                                  text: 'นโยบายความเป็นส่วนตัว',
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                  // Row(
+                  //   children: [
+                  //     Checkbox(
+                  //       value: _acceptTerms,
+                  //       onChanged: (value) {
+                  //         setState(() {
+                  //           _acceptTerms = value ?? false;
+                  //         });
+                  //       },
+                  //       activeColor: colorScheme.primary,
+                  //     ),
+                  //     Expanded(
+                  //       child: GestureDetector(
+                  //         onTap: () {
+                  //           setState(() {
+                  //             _acceptTerms = !_acceptTerms;
+                  //           });
+                  //         },
+                  //         child: RichText(
+                  //           text: TextSpan(
+                  //             style: theme.textTheme.bodySmall?.copyWith(
+                  //               color: colorScheme.onSurfaceVariant,
+                  //             ),
+                  //             children: [
+                  //               const TextSpan(text: 'ฉันยอมรับ '),
+                  //               TextSpan(
+                  //                 text: 'ข้อกำหนดและเงื่อนไข',
+                  //                 style: TextStyle(
+                  //                   color: colorScheme.primary,
+                  //                   fontWeight: FontWeight.w600,
+                  //                 ),
+                  //               ),
+                  //               const TextSpan(text: ' และ '),
+                  //               TextSpan(
+                  //                 text: 'นโยบายความเป็นส่วนตัว',
+                  //                 style: TextStyle(
+                  //                   color: colorScheme.primary,
+                  //                   fontWeight: FontWeight.w600,
+                  //                 ),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 24),
 
                   // ปุ่ม Register
                   SizedBox(

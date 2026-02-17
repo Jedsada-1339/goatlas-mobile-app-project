@@ -13,6 +13,8 @@ import '../components/custom_bottom_nav_bar.dart';
 import '../components/blog_card.dart';
 import '../components/drawer_listview.dart';
 
+import '../utills/firebase_service.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -21,6 +23,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _firebaseService = FirebaseService();
+  String _username = 'ผู้ใช้งาน';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+  }
+
+  Future<void> _loadUsername() async {
+    final user = _firebaseService.currentUser;
+    if (user != null) {
+      final username = await _firebaseService.getUsername(user.uid);
+      if (mounted && username != null) {
+        setState(() {
+          _username = username;
+        });
+      }
+    }
+  }
+
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'ยอดนิยม';
   String _selectedTripCategory = 'ยอดนิยม';
@@ -249,15 +272,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         CircleAvatar(
                           radius: 24,
                           backgroundImage: CachedNetworkImageProvider(
-                            'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
-                            // 'https://ui-avatars.com/api/?name=Jedsada&background=00BCD4&color=fff',
+                            // 'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
+                            'https://ui-avatars.com/api/?name={$_username}&background=00BCD4&color=fff',
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'สวัสดีค่ะ',
                               style: TextStyle(
                                 color: Colors.white,
@@ -265,8 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             Text(
-                              'Carl',
-                              style: TextStyle(
+                              '$_username',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
