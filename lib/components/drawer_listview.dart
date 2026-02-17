@@ -27,15 +27,26 @@ class _DrawerListviewState extends State<DrawerListview> {
 
   Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
+
+    // Debug
+    print('=== DEBUG USER ===');
+    print('user: $user');
+    print('uid: ${user?.uid}');
+    print('email: ${user?.email}');
+    print('==================');
+
     if (user != null) {
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
 
+      print('doc exists: ${doc.exists}');
+      print('doc data: ${doc.data()}');
+
       if (mounted) {
         setState(() {
-          _email = user.email ?? 'email ไม่ระบุ';
+          _email = user.email ?? '';
           _username = doc.data()?['username'] ?? 'ผู้ใช้งาน';
         });
       }
