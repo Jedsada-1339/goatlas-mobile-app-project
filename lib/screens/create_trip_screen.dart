@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../components/custom_bottom_nav_bar.dart';
 import '../components/cached_image_with_placeholder.dart';
 import '../models/trip_model.dart';
@@ -10,7 +12,7 @@ import 'add_place_screen.dart';
 class CreateTripScreen extends StatefulWidget {
   final TripModel? trip;
 
-  const CreateTripScreen({Key? key, this.trip}) : super(key: key);
+  const CreateTripScreen({super.key, this.trip});
 
   @override
   State<CreateTripScreen> createState() => _CreateTripScreenState();
@@ -22,6 +24,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   late TripModel _currentTrip;
   bool _isEditing = false;
   DateTimeRange? _selectedDateRange;
+  String? _localImagePath; // รูปปกจากเครื่อง
+  final ImagePicker _imagePicker = ImagePicker();
 
   Color get primaryColor => Theme.of(context).primaryColor;
 
@@ -43,8 +47,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       _currentTrip = TripModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: '',
-        coverImageUrl:
-            'https://images.unsplash.com/photo-1512553785840-eeaffc1fcf8c',
+        coverImageUrl: '',
         dayPlans: [
           DayPlanModel(dayNumber: 1),
           DayPlanModel(dayNumber: 2),
@@ -52,6 +55,119 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         ],
       );
     }
+  }
+
+  /// เลือกรูปปกจากแกลเลอรี่หรือกล้อง
+  Future<void> _pickCoverImage() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'เลือกรูปปก',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.photo_library, color: primaryColor),
+                ),
+                title: const Text('เลือกจากแกลเลอรี่'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? image = await _imagePicker.pickImage(
+                    source: ImageSource.gallery,
+                    maxWidth: 1200,
+                    maxHeight: 800,
+                    imageQuality: 85,
+                  );
+                  if (image != null) {
+                    setState(() {
+                      _localImagePath = image.path;
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.camera_alt, color: primaryColor),
+                ),
+                title: const Text('ถ่ายรูป'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? image = await _imagePicker.pickImage(
+                    source: ImageSource.camera,
+                    maxWidth: 1200,
+                    maxHeight: 800,
+                    imageQuality: 85,
+                  );
+                  if (image != null) {
+                    setState(() {
+                      _localImagePath = image.path;
+                    });
+                  }
+                },
+              ),
+              if (_localImagePath != null)
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.delete_outline, color: Colors.red),
+                  ),
+                  title: const Text('ลบรูปปก'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _localImagePath = null;
+                    });
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// หา cover image URL ที่จะใช้  (ลำดับ: รูปที่เลือก > รูปสถานที่แรก > ค่าว่าง)
+  String get _effectiveCoverImageUrl {
+    // ถ้ามีรูปปกจากเครื่องจะใช้ตอน display
+    if (_localImagePath != null) return '';
+    // ถ้ามี coverImageUrl อยู่แล้ว
+    if (_currentTrip.coverImageUrl.isNotEmpty)
+      return _currentTrip.coverImageUrl;
+    // ใช้รูปจากสถานที่แรกที่เพิ่มมา
+    for (final day in _currentTrip.dayPlans) {
+      for (final place in day.places) {
+        if (place.imageUrl.isNotEmpty) return place.imageUrl;
+      }
+    }
+    return '';
   }
 
   @override
@@ -161,7 +277,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       return;
     }
 
-    final savedTrip = _currentTrip.copyWith(name: _tripNameController.text);
+    // ถ้าผู้ใช้ไม่เลือกรูปปก ใช้รูปสถานที่แรก
+    String coverUrl = _currentTrip.coverImageUrl;
+    if (_localImagePath != null) {
+      coverUrl = _localImagePath!;
+    } else if (coverUrl.isEmpty) {
+      coverUrl = _effectiveCoverImageUrl;
+    }
+
+    final savedTrip = _currentTrip.copyWith(
+      name: _tripNameController.text,
+      coverImageUrl: coverUrl,
+    );
 
     Navigator.pop(context, savedTrip);
 
@@ -256,91 +383,135 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   }
 
   Widget _buildCoverImage() {
+    final bool hasLocalImage = _localImagePath != null;
+    final String networkUrl = _effectiveCoverImageUrl;
+    final bool hasAnyImage = hasLocalImage || networkUrl.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        height: 180,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: CachedImageWithPlaceholder(
-                imageUrl: _currentTrip.coverImageUrl,
-                width: double.infinity,
-                height: 180,
-                fit: BoxFit.cover,
-                errorWidget: Container(
-                  color: Colors.grey[300],
-                  child: const Icon(
-                    Icons.landscape,
-                    size: 60,
-                    color: Colors.grey,
+      child: GestureDetector(
+        onTap: _pickCoverImage,
+        child: Container(
+          width: double.infinity,
+          height: 180,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: const Color(0xFFE2E8F0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: hasLocalImage
+                    ? Image.file(
+                        File(_localImagePath!),
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                      )
+                    : hasAnyImage
+                    ? CachedImageWithPlaceholder(
+                        imageUrl: networkUrl,
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                        errorWidget: _buildPlaceholderIcon(),
+                      )
+                    : _buildPlaceholderIcon(),
+              ),
+              // Gradient Overlay
+              if (hasAnyImage)
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.4),
+                      ],
+                    ),
+                  ),
+                ),
+              // Change Cover Button
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.camera_alt, size: 16, color: primaryColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        hasAnyImage ? 'เปลี่ยนรูปปก' : 'เพิ่มรูปปก',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-            // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
-                ),
-              ),
-            ),
-            // Change Cover Button
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.edit, size: 16, color: Color(0xFF0F172A)),
-                    SizedBox(width: 6),
-                    Text(
-                      'เปลี่ยนรูปปก',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderIcon() {
+    return Container(
+      width: double.infinity,
+      height: 180,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE2E8F0),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_photo_alternate_outlined,
+            size: 48,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'แตะเพื่อเพิ่มรูปปก',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

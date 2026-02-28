@@ -40,4 +40,30 @@ class DayPlanModel {
 
   /// จำนวนสถานที่
   int get placeCount => places.length;
+
+  /// แปลงเป็น Map สำหรับ Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'dayNumber': dayNumber,
+      'hotelName': hotelName,
+      'hotelImageUrl': hotelImageUrl,
+      'places': places.map((p) => p.toMap()).toList(),
+    };
+  }
+
+  /// สร้างจาก Map (Firestore)
+  factory DayPlanModel.fromMap(Map<String, dynamic> map) {
+    return DayPlanModel(
+      dayNumber: map['dayNumber'] ?? 1,
+      hotelName: map['hotelName'],
+      hotelImageUrl: map['hotelImageUrl'],
+      places:
+          (map['places'] as List<dynamic>?)
+              ?.map(
+                (p) => PlaceModel.fromMap(Map<String, dynamic>.from(p as Map)),
+              )
+              .toList() ??
+          [],
+    );
+  }
 }

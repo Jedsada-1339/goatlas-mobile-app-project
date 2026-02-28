@@ -5,8 +5,7 @@ import '../components/cached_image_with_placeholder.dart';
 class DestinationDetailScreen extends StatelessWidget {
   final Destination destination;
 
-  const DestinationDetailScreen({Key? key, required this.destination})
-    : super(key: key);
+  const DestinationDetailScreen({super.key, required this.destination});
 
   @override
   Widget build(BuildContext context) {
@@ -135,17 +134,6 @@ class DestinationDetailScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Implement Add to Trip functionality
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ฟีเจอร์นี้จะมาเร็วๆ นี้')),
-          );
-        },
-        label: const Text('เพิ่มลงทริป'),
-        icon: const Icon(Icons.add),
-        backgroundColor: const Color(0xFF00BCD4),
       ),
     );
   }

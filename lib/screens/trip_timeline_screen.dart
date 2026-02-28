@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/trip_model.dart';
+import '../models/day_plan_model.dart';
 import '../models/place_model.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,7 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 class TripTimelineScreen extends StatefulWidget {
   final TripModel trip;
 
-  const TripTimelineScreen({Key? key, required this.trip}) : super(key: key);
+  const TripTimelineScreen({super.key, required this.trip});
 
   @override
   State<TripTimelineScreen> createState() => _TripTimelineScreenState();
@@ -18,22 +19,37 @@ class TripTimelineScreen extends StatefulWidget {
 class _TripTimelineScreenState extends State<TripTimelineScreen> {
   late TripModel _trip;
   final MapController _mapController = MapController();
-  List<Marker> _markers = [];
+  final List<Marker> _markers = [];
 
   // Store GlobalKeys for each day section to enable scrolling to them
   final Map<int, GlobalKey> _dayKeys = {};
 
-  // Track selected day
-  int _selectedDay = 0;
+  // Track selected filter: -1 for All Days, 0..n for specific days
+  int _selectedFilter = -1;
 
-  // Flag to prevent scroll listener from interfering with tap-to-scroll
-  bool _isprogrammaticScroll = false;
+  final List<Polyline> _polylines = [];
+
+  // Colors for different days
+  final List<Color> _dayColors = [
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.brown,
+    Colors.indigo,
+  ];
+
+  Color _getColorForDay(int dayIndex) {
+    return _dayColors[dayIndex % _dayColors.length];
+  }
 
   @override
   void initState() {
     super.initState();
     _trip = widget.trip;
-    _createMarkers();
+    _createMarkersAndPolylines();
 
     // Initialize keys for each day
     for (int i = 0; i < _trip.dayPlans.length; i++) {
@@ -41,43 +57,116 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
     }
   }
 
-  void _createMarkers() {
+  void _createMarkersAndPolylines() {
     _markers.clear();
-    for (var day in _trip.dayPlans) {
-      for (var place in day.places) {
-        if (place.latitude != null && place.longitude != null) {
-          _markers.add(
-            Marker(
-              point: LatLng(place.latitude!, place.longitude!),
-              width: 80,
-              height: 80,
-              child: Column(
-                children: [
-                  const Icon(Icons.location_on, color: Colors.red, size: 40),
-                  Text(
-                    place.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                      backgroundColor: Colors.white,
-                    ),
-                  ),
-                ],
+    _polylines.clear();
+    if (_trip.dayPlans.isEmpty) return;
+
+    if (_selectedFilter == -1) {
+      // Show all days
+      int globalSequence = 1;
+      for (int dayIndex = 0; dayIndex < _trip.dayPlans.length; dayIndex++) {
+        final dayPlan = _trip.dayPlans[dayIndex];
+        final dayColor = _getColorForDay(dayIndex);
+        globalSequence = _addDayPlanToMap(
+          dayPlan,
+          dayColor,
+          startingSequence: globalSequence,
+        );
+      }
+    } else if (_selectedFilter < _trip.dayPlans.length) {
+      // Show specific day
+      final dayPlan = _trip.dayPlans[_selectedFilter];
+      final dayColor = _getColorForDay(_selectedFilter);
+      _addDayPlanToMap(dayPlan, dayColor, startingSequence: 1);
+    }
+  }
+
+  int _addDayPlanToMap(
+    DayPlanModel dayPlan,
+    Color color, {
+    int startingSequence = 1,
+  }) {
+    List<LatLng> dayPoints = [];
+    int placeSequence = startingSequence;
+
+    for (var place in dayPlan.places) {
+      if (place.latitude != null && place.longitude != null) {
+        final point = LatLng(place.latitude!, place.longitude!);
+        dayPoints.add(point);
+        _addNumberedMarker(place, point, color, placeSequence);
+      }
+      placeSequence++;
+    }
+
+    if (dayPoints.length > 1) {
+      _polylines.add(
+        Polyline(points: dayPoints, strokeWidth: 4.0, color: color),
+      );
+    }
+
+    return placeSequence;
+  }
+
+  void _addNumberedMarker(
+    PlaceModel place,
+    LatLng point,
+    Color color,
+    int sequence,
+  ) {
+    _markers.add(
+      Marker(
+        point: point,
+        width: 80,
+        height: 80,
+        child: Column(
+          children: [
+            Icon(Icons.location_on, color: color, size: 40),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: color, width: 1),
+              ),
+              child: Text(
+                place.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
               ),
             ),
-          );
-        }
-      }
-    }
+          ],
+        ),
+      ),
+    );
   }
 
   void _fitBounds() {
     if (_markers.isEmpty) return;
 
     final points = _markers.map((m) => m.point).toList();
+
+    // Check if all coordinates are the same
+    bool allSame = true;
+    for (int i = 1; i < points.length; i++) {
+      if (points[i].latitude != points[0].latitude ||
+          points[i].longitude != points[0].longitude) {
+        allSame = false;
+        break;
+      }
+    }
+
+    if (allSame) {
+      _mapController.move(points[0], 13.0);
+      return;
+    }
+
     final bounds = LatLngBounds.fromPoints(points);
 
     _mapController.fitCamera(
@@ -123,43 +212,51 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
         for (int i = 0; i < _trip.dayPlans.length; i++) {
           _dayKeys[i] = GlobalKey();
         }
-        _createMarkers();
+        _createMarkersAndPolylines();
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fitBounds();
       });
     }
   }
 
-  void _scrollToDay(int index) {
-    if (_dayKeys.containsKey(index)) {
-      setState(() {
-        _selectedDay = index;
-        _isprogrammaticScroll = true;
-      });
+  void _setFilter(int filterIndex) {
+    setState(() {
+      _selectedFilter = filterIndex;
+      _createMarkersAndPolylines();
+    });
 
-      Scrollable.ensureVisible(
-        _dayKeys[index]!.currentContext!,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-        alignment: 0.05, // Slight offset from top
-      ).then((_) {
-        _isprogrammaticScroll = false;
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fitBounds();
+    });
   }
 
   Future<void> _launchMaps(
     double? startLat,
     double? startLng,
     double endLat,
-    double endLng,
-  ) async {
+    double endLng, {
+    String? destinationName,
+    String? originName,
+  }) async {
     final Map<String, String> queryParams = {
       'api': '1',
-      'destination': '$endLat,$endLng',
       'travelmode': 'driving',
     };
 
+    if (destinationName != null && destinationName.isNotEmpty) {
+      queryParams['destination'] = destinationName;
+    } else {
+      queryParams['destination'] = '$endLat,$endLng';
+    }
+
     if (startLat != null && startLng != null) {
-      queryParams['origin'] = '$startLat,$startLng';
+      if (originName != null && originName.isNotEmpty) {
+        queryParams['origin'] = originName;
+      } else {
+        queryParams['origin'] = '$startLat,$startLng';
+      }
     }
 
     final Uri url = Uri.https('www.google.com', '/maps/dir/', queryParams);
@@ -223,15 +320,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                       ),
                     ],
                   ),
-                  PolylineLayer(
-                    polylines: [
-                      Polyline(
-                        points: _markers.map((m) => m.point).toList(),
-                        strokeWidth: 4.0,
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
+                  PolylineLayer(polylines: _polylines),
                   MarkerLayer(
                     markers: _markers.isEmpty
                         ? [
@@ -275,133 +364,101 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
               // But ScrollController is passed by DraggableScrollableSheet, it's persistent.
               // We'll wrap the listener adding in a unique way or just check in a NotificationListener
 
-              return NotificationListener<ScrollNotification>(
-                onNotification: (scrollNotification) {
-                  if (scrollNotification is ScrollUpdateNotification &&
-                      !_isprogrammaticScroll) {
-                    // Implement Scroll Spy logic here
-                    // Check which key is at the top
-                    for (int i = 0; i < _trip.dayPlans.length; i++) {
-                      final key = _dayKeys[i];
-                      if (key?.currentContext != null) {
-                        final RenderBox box =
-                            key!.currentContext!.findRenderObject()
-                                as RenderBox;
-                        final Offset position = box.localToGlobal(Offset.zero);
-
-                        // The draggable sheet top is around 40-50% of screen height initially,
-                        // or 0 when expanded.
-                        // A safe bet is to check if the item is somewhat near the top of the screen.
-                        // We can improve this logic, but for now let's say if y is between 100 and 400.
-                        // A better way is to check relative to the scroll view viewport, but that's harder to get here.
-
-                        if (position.dy > 100 && position.dy < 400) {
-                          if (_selectedDay != i) {
-                            setState(() {
-                              _selectedDay = i;
-                            });
-                          }
-                          break; // Found the top-most visible one
-                        }
-                      }
-                    }
-                  }
-                  return false;
-                },
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(32),
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 20,
+                      offset: Offset(0, -5),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 20,
-                        offset: Offset(0, -5),
-                      ),
-                    ],
-                  ),
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Handle Bar
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFCBD5E1),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Handle Bar
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                      ),
+                      const SizedBox(height: 24),
 
-                        // Trip Title with Edit Button
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _trip.name,
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0F172A),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _trip.dateRangeText,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: _editTrip,
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(0xFFE2E8F0),
+                      // Trip Title with Edit Button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _trip.name,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F172A),
                                   ),
                                 ),
-                                child: const Icon(
-                                  Icons.edit_outlined,
-                                  size: 20,
-                                  color: Color(0xFF0F172A),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _trip.dateRangeText,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _editTrip,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
                                 ),
                               ),
+                              child: const Icon(
+                                Icons.edit_outlined,
+                                size: 20,
+                                color: Color(0xFF0F172A),
+                              ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
 
-                        // Day Selector
-                        _buildDaySelector(),
+                      // Day Selector
+                      _buildDaySelector(),
 
-                        const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                        // Timeline content using Column instead of ListView for SingleChildScrollView
+                      // Timeline content using Column instead of ListView for SingleChildScrollView
+                      if (_selectedFilter == -1)
                         ...List.generate(_trip.dayPlans.length, (index) {
                           return _buildDaySection(index);
-                        }),
+                        })
+                      else if (_selectedFilter >= 0 &&
+                          _selectedFilter < _trip.dayPlans.length)
+                        _buildDaySection(_selectedFilter),
 
-                        const SizedBox(height: 80), // Bottom padding
-                      ],
-                    ),
+                      const SizedBox(height: 80), // Bottom padding
+                    ],
                   ),
                 ),
               );
@@ -436,7 +493,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _launchDayRoute,
         icon: const Icon(Icons.map),
-        label: const Text('นำทางวันนี้'),
+        label: Text(_selectedFilter == -1 ? 'นำทางทริปนี้' : 'นำทางวันนี้'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
       ),
@@ -444,44 +501,91 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
   }
 
   Future<void> _launchDayRoute() async {
-    final dayPlan = _trip.dayPlans[_selectedDay];
-    final placesWithLoc = dayPlan.places
-        .where((p) => p.latitude != null && p.longitude != null)
-        .toList();
+    List<PlaceModel> validPlaces = [];
 
-    if (placesWithLoc.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ไม่มีสถานที่ที่มีพิกัดในวันนี้')),
-      );
+    if (_selectedFilter == -1) {
+      // All days
+      for (var day in _trip.dayPlans) {
+        validPlaces.addAll(day.places.where((p) => p.name.isNotEmpty));
+      }
+    } else {
+      // Specific day
+      final dayPlan = _trip.dayPlans[_selectedFilter];
+      validPlaces = dayPlan.places.where((p) => p.name.isNotEmpty).toList();
+    }
+
+    if (validPlaces.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ไม่มีสถานที่')));
       return;
     }
 
-    final Map<String, String> queryParams = {
-      'api': '1',
-      'travelmode': 'driving',
-    };
+    String urlStr;
 
-    // Origin: First place
-    final start = placesWithLoc.first;
-    // Destination: Last place
-    // If only 1 place, logic is tricky for "route". Google Maps Dir needs dest.
-    // We set dest = place. Origin = user location (implicit if omitted).
-    if (placesWithLoc.length == 1) {
-      queryParams['destination'] = '${start.latitude},${start.longitude}';
+    if (validPlaces.length == 1) {
+      final String destinationStr = Uri.encodeComponent(validPlaces.first.name);
+      urlStr =
+          'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=$destinationStr';
     } else {
-      queryParams['origin'] = '${start.latitude},${start.longitude}';
-      final end = placesWithLoc.last;
-      queryParams['destination'] = '${end.latitude},${end.longitude}';
+      final String destinationStr = Uri.encodeComponent(validPlaces.last.name);
 
-      if (placesWithLoc.length > 2) {
-        final waypoints = placesWithLoc.sublist(1, placesWithLoc.length - 1);
-        queryParams['waypoints'] = waypoints
-            .map((p) => '${p.latitude},${p.longitude}')
-            .join('|');
+      var waypointsList = validPlaces.sublist(0, validPlaces.length - 1);
+      // Google Maps supports max 9 waypoints in standard requests
+      if (waypointsList.length > 9) {
+        waypointsList = waypointsList.sublist(0, 9);
       }
+
+      final String waypointsStr = waypointsList
+          .map((p) => Uri.encodeComponent(p.name))
+          .join('|');
+      urlStr =
+          'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=$destinationStr&waypoints=$waypointsStr';
     }
 
-    final Uri url = Uri.https('www.google.com', '/maps/dir/', queryParams);
+    final Uri url = Uri.parse(urlStr);
+
+    // Debug: Show URL in dialog before launching so we can verify new code is running
+    if (mounted) {
+      final shouldLaunch = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('นำทาง Google Maps'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('จำนวนสถานที่: ${validPlaces.length}'),
+                const SizedBox(height: 8),
+                ...validPlaces.asMap().entries.map(
+                  (e) => Text('${e.key + 1}. ${e.value.name}'),
+                ),
+                const Divider(),
+                const Text(
+                  'URL:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(urlStr, style: const TextStyle(fontSize: 11)),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ยกเลิก'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('เปิดแผนที่'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldLaunch != true) return;
+    }
 
     try {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -508,11 +612,14 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _trip.dayPlans.length,
-        itemBuilder: (context, index) {
-          final isSelected = _selectedDay == index;
+        itemCount: _trip.dayPlans.length + 1, // +1 for "All Days"
+        itemBuilder: (context, idx) {
+          final filterIndex =
+              idx - 1; // -1 for All Days, 0..n for specific days
+          final isSelected = _selectedFilter == filterIndex;
+
           return GestureDetector(
-            onTap: () => _scrollToDay(index),
+            onTap: () => _setFilter(filterIndex),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: 70,
@@ -543,7 +650,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'วันที่',
+                    filterIndex == -1 ? 'ทั้งหมด' : 'วันที่',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
@@ -553,16 +660,25 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    '${index + 1}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  if (filterIndex == -1)
+                    Icon(
+                      Icons.map_outlined,
                       color: isSelected
                           ? Colors.white
                           : const Color(0xFF0F172A),
+                      size: 24,
+                    )
+                  else
+                    Text(
+                      '${filterIndex + 1}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF0F172A),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -700,120 +816,130 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
 
           // Content Card
           Expanded(
-            child: Opacity(
-              opacity: place.isVisited ? 0.6 : 1.0,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            place.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0F172A),
-                              decoration: place.isVisited
-                                  ? TextDecoration.lineThrough
-                                  : null,
+            child: GestureDetector(
+              onTap: () {
+                if (place.latitude != null && place.longitude != null) {
+                  final point = LatLng(place.latitude!, place.longitude!);
+                  _mapController.move(point, 15.0);
+                }
+              },
+              child: Opacity(
+                opacity: place.isVisited ? 0.6 : 1.0,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(color: const Color(0xFFF1F5F9)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              place.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0F172A),
+                                decoration: place.isVisited
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
                             ),
                           ),
-                        ),
-                        if (place.latitude != null && place.longitude != null)
-                          GestureDetector(
-                            onTap: () {
-                              // Find previous place
-                              PlaceModel? prevPlace;
-                              if (placeIndex > 0) {
-                                prevPlace = _trip
-                                    .dayPlans[dayIndex]
-                                    .places[placeIndex - 1];
-                              } else if (dayIndex > 0) {
-                                // Look for last place of previous days
-                                for (int d = dayIndex - 1; d >= 0; d--) {
-                                  if (_trip.dayPlans[d].places.isNotEmpty) {
-                                    prevPlace = _trip.dayPlans[d].places.last;
-                                    break;
+                          if (place.latitude != null && place.longitude != null)
+                            GestureDetector(
+                              onTap: () {
+                                // Find previous place
+                                PlaceModel? prevPlace;
+                                if (placeIndex > 0) {
+                                  prevPlace = _trip
+                                      .dayPlans[dayIndex]
+                                      .places[placeIndex - 1];
+                                } else if (dayIndex > 0) {
+                                  // Look for last place of previous days
+                                  for (int d = dayIndex - 1; d >= 0; d--) {
+                                    if (_trip.dayPlans[d].places.isNotEmpty) {
+                                      prevPlace = _trip.dayPlans[d].places.last;
+                                      break;
+                                    }
                                   }
                                 }
-                              }
 
-                              _launchMaps(
-                                prevPlace?.latitude,
-                                prevPlace?.longitude,
-                                place.latitude!,
-                                place.longitude!,
-                              );
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.directions,
-                                size: 16,
-                                color: Colors.blue,
+                                _launchMaps(
+                                  prevPlace?.latitude,
+                                  prevPlace?.longitude,
+                                  place.latitude!,
+                                  place.longitude!,
+                                  destinationName: place.name,
+                                  originName: prevPlace?.name,
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.directions,
+                                  size: 16,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
+                          _buildTypeBadge(place.placeType),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Colors.grey[400],
                           ),
-                        _buildTypeBadge(place.placeType),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          place.duration,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 14,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            place.location,
+                          const SizedBox(width: 4),
+                          Text(
+                            place.duration,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[500],
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 14,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              place.location,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[500],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

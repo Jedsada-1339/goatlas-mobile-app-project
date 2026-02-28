@@ -6,10 +6,10 @@ class CreateBlogScreen extends StatefulWidget {
   final String authorAvatar;
 
   const CreateBlogScreen({
-    Key? key,
+    super.key,
     required this.authorName,
     required this.authorAvatar,
-  }) : super(key: key);
+  });
 
   @override
   State<CreateBlogScreen> createState() => _CreateBlogScreenState();

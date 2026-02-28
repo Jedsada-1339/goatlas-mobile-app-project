@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FaqSupportPage extends StatefulWidget {
-  const FaqSupportPage({Key? key}) : super(key: key);
+  const FaqSupportPage({super.key});
 
   @override
   State<FaqSupportPage> createState() => _FaqSupportPageState();
@@ -394,7 +394,7 @@ class _FaqSupportPageState extends State<FaqSupportPage>
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
 
                         const SizedBox(height: 8),
                       ],

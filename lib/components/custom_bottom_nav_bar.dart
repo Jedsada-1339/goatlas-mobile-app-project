@@ -7,8 +7,7 @@ import '../screens/profile_screen.dart';
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
 
-  const CustomBottomNavBar({Key? key, required this.currentIndex})
-    : super(key: key);
+  const CustomBottomNavBar({super.key, required this.currentIndex});
 
   void _onTap(BuildContext context, int index) {
     // ถ้ากดปุ่มเดิมที่อยู่แล้ว ไม่ต้องทำอะไร

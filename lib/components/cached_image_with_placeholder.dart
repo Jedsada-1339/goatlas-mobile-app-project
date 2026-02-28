@@ -15,7 +15,7 @@ class CachedImageWithPlaceholder extends StatelessWidget {
   final Color shimmerHighlightColor;
 
   const CachedImageWithPlaceholder({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
@@ -24,7 +24,7 @@ class CachedImageWithPlaceholder extends StatelessWidget {
     this.errorWidget,
     this.shimmerBaseColor = const Color(0xFFE0E0E0),
     this.shimmerHighlightColor = const Color(0xFFF5F5F5),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,13 +114,13 @@ class CachedCardImage extends StatelessWidget {
   final BoxFit fit;
 
   const CachedCardImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
     this.borderRadius = 16.0,
     this.fit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -149,10 +149,10 @@ class CachedFullImage extends StatelessWidget {
   final BoxFit fit;
 
   const CachedFullImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.fit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
