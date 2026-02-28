@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:goatlas/components/trip_card.dart';
 import 'package:goatlas/screens/blog_information_screen.dart';
-import 'package:goatlas/screens/destination_detail_screen.dart';
 import '../models/destination.dart';
+import '../services/tat_api_service.dart';
 import '../models/trip.dart';
+
 import '../models/blog_model.dart';
 import '../components/custom_search_bar.dart';
 import '../components/category_chip.dart';
@@ -12,11 +13,12 @@ import '../components/destination_card.dart';
 import '../components/custom_bottom_nav_bar.dart';
 import '../components/blog_card.dart';
 import '../components/drawer_listview.dart';
+import '../screens/destination_detail_screen.dart';
 
 import '../utills/firebase_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -25,20 +27,46 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _firebaseService = FirebaseService();
   String _username = 'ผู้ใช้งาน';
+  String? _photoUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUserData();
+    _loadPlaces();
   }
 
-  Future<void> _loadUsername() async {
+  Future<void> _loadUserData() async {
     final user = _firebaseService.currentUser;
     if (user != null) {
-      final username = await _firebaseService.getUsername(user.uid);
-      if (mounted && username != null) {
+      final userData = await _firebaseService.getUserData(user.uid);
+      if (mounted && userData != null) {
         setState(() {
-          _username = username;
+          _username = userData['username'] ?? 'ผู้ใช้งาน';
+          _photoUrl = userData['photoUrl'];
+        });
+      }
+    }
+  }
+
+  final TatApiService _tatApiService = TatApiService();
+  bool _isLoadingPlaces = true;
+
+  Future<void> _loadPlaces() async {
+    try {
+      final places = await _tatApiService.fetchPlaces(limit: 10);
+      if (mounted) {
+        setState(() {
+          _destinations.clear();
+          _destinations.addAll(places);
+          _isLoadingPlaces = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading places: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingPlaces = false;
         });
       }
     }
@@ -59,43 +87,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<String> _tripCategories = ['ยอดนิยม', 'ไปสูงสุด', 'ไปบ่อยช่วงนี้'];
 
   // ข้อมูลตัวอย่าง
-  final List<Destination> _destinations = [
-    Destination(
-      id: '1',
-      name: 'เกาะพีพี',
-      location: 'จังหวัดกระบี่',
-      imageUrl: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a',
-      category: 'ยอดนิยม',
-      isFavorite: true,
-      rating: 4.8,
-      description:
-          'เกาะพีพี เป็นหมู่เกาะกลางทะเลอันดามันที่สวยงามระดับโลก ประกอบด้วย 2 เกาะใหญ่ คือ เกาะพีพีดอน และเกาะพีพีเล มีอ่าวมาหยาที่โด่งดัง น้ำทะเลสีมรกต ทรายขาวละเอียด เหมาะแก่การดำน้ำชมปะการัง',
-    ),
-    Destination(
-      id: '2',
-      name: 'อุทยานประวัติศาสตร์',
-      location: 'พระนครศรีอยุธยา',
-      imageUrl: 'https://images.unsplash.com/photo-1528181304800-259b08848526',
-      category: 'วัฒนธรรม',
-      isFavorite: false,
-      rating: 4.6,
-      description:
-          'แหล่งมรดกโลกที่ทรงคุณค่า เต็มไปด้วยวัดและโบราณสถานเก่าแก่ที่แสดงถึงความเจริญรุ่งเรืองของอาณาจักรอยุธยาในอดีต ชมความงามของสถาปัตยกรรมไทยโบราณและเรียนรู้ประวัติศาสตร์ชาติไทย',
-    ),
-    Destination(
-      id: '3',
-      name: 'ดอยอินทนนท์',
-      location: 'จังหวัดเชียงใหม่',
-      imageUrl: 'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648',
-      category: 'ธรรมชาติ',
-      isFavorite: false,
-      rating: 4.9,
-      description:
-          'ยอดเขาที่สูงที่สุดในประเทศไทย สัมผัสอากาศหนาวเย็นตลอดทั้งปี ชมทะเลหมอก เดินป่าศึกษาธรรมชาติกิ่วแม่ปาน และสักการะพระมหาธาตุนภเมทนีดลและพระมหาธาตุนภพลภูมิสิริ',
-    ),
-  ];
+  final List<Destination> _destinations = [];
 
-  // ข้อมูลทริปตัวอย่าง
+  // ข้อมูลทริปตัวอย่าง (ทริปแนะนำจากผู้ใช้คนอื่น - Mockup)
   final List<Trip> _tripDestinations = [
     Trip(
       id: '1',
@@ -272,8 +266,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         CircleAvatar(
                           radius: 24,
                           backgroundImage: CachedNetworkImageProvider(
-                            // 'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
-                            'https://ui-avatars.com/api/?name={$_username}&background=00BCD4&color=fff',
+                            _photoUrl != null && _photoUrl!.isNotEmpty
+                                ? _photoUrl!
+                                : 'https://ui-avatars.com/api/?name=$_username&background=00BCD4&color=fff',
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -288,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             Text(
-                              '$_username',
+                              _username,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -381,7 +376,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Destination Cards
                         SizedBox(
                           height: 300,
-                          child: _filteredDestinations.isEmpty
+                          child: _isLoadingPlaces
+                              ? const Center(child: CircularProgressIndicator())
+                              : _filteredDestinations.isEmpty
                               ? Center(
                                   child: Text(
                                     'ไม่พบสถานที่ท่องเที่ยว',
@@ -465,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         const SizedBox(height: 20),
 
-                        // Trip Cards
+                        // Trip Cards (Mockup - ทริปแนะนำจากผู้ใช้คนอื่น)
                         SizedBox(
                           height: 250,
                           child: _filteredTrips.isEmpty
@@ -489,13 +486,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                     final realIndex = _tripDestinations.indexOf(
                                       destination,
                                     );
-                                    return TripCard(
-                                      trip: _tripDestinations[index],
-                                      height: 250,
-                                      width: 250,
-                                      onFavoriteToggle: () =>
-                                          _toggleTripFavorite(realIndex),
-                                      onTap: () {},
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        right: index < _filteredTrips.length - 1
+                                            ? 16
+                                            : 0,
+                                      ),
+                                      child: TripCard(
+                                        trip: _tripDestinations[index],
+                                        height: 250,
+                                        width: 250,
+                                        onFavoriteToggle: () =>
+                                            _toggleTripFavorite(realIndex),
+                                        onTap: () {},
+                                      ),
                                     );
                                   },
                                 ),

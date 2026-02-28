@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'day_plan_model.dart';
 import 'place_model.dart';
 
@@ -121,5 +122,39 @@ class TripModel {
     }).toList();
 
     return copyWith(dayPlans: newDays);
+  }
+
+  /// แปลงเป็น Map สำหรับ Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'coverImageUrl': coverImageUrl,
+      'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
+      'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
+      'dayPlans': dayPlans.map((d) => d.toMap()).toList(),
+      'isFavorite': isFavorite,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
+  /// สร้างจาก Firestore document
+  factory TripModel.fromMap(String id, Map<String, dynamic> map) {
+    return TripModel(
+      id: id,
+      name: map['name'] ?? '',
+      coverImageUrl: map['coverImageUrl'] ?? '',
+      startDate: (map['startDate'] as Timestamp?)?.toDate(),
+      endDate: (map['endDate'] as Timestamp?)?.toDate(),
+      dayPlans:
+          (map['dayPlans'] as List<dynamic>?)
+              ?.map(
+                (d) =>
+                    DayPlanModel.fromMap(Map<String, dynamic>.from(d as Map)),
+              )
+              .toList() ??
+          [],
+      isFavorite: map['isFavorite'] ?? false,
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
   }
 }

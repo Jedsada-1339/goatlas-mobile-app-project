@@ -1,15 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../components/custom_bottom_nav_bar.dart';
 import '../components/trip_card.dart';
 import '../components/blog_card.dart';
 import '../models/trip.dart';
 import '../models/blog_model.dart';
+import '../utills/firebase_service.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final _firebaseService = FirebaseService();
+  String _username = 'กำลังโหลด...';
+  String _email = '';
+  String? _photoUrl;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = _firebaseService.currentUser;
+    if (user != null) {
+      final userData = await _firebaseService.getUserData(user.uid);
+      if (mounted && userData != null) {
+        setState(() {
+          _username = userData['username'] ?? 'ผู้ใช้งาน';
+          _email = userData['email'] ?? user.email ?? '';
+          _photoUrl = userData['photoUrl'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
 
   // --- Mock: ทริปที่เคยสร้าง ---
-  static final List<Trip> _myTrips = [
+  final List<Trip> _myTrips = [
     Trip(
       id: '1',
       name: 'ขึ้นเขาสนุกจังโว้ย',
@@ -51,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
   ];
 
   // --- Mock: บล็อกที่เคยโพส ---
-  static final List<BlogPost> _myBlogs = [
+  final List<BlogPost> _myBlogs = [
     BlogPost(
       id: '1',
       title: '10 สถานที่ท่องเที่ยวสุดฮิตในภาคเหนือ',
@@ -121,58 +159,60 @@ class ProfileScreen extends StatelessWidget {
           iconTheme: const IconThemeData(color: Colors.black87),
           automaticallyImplyLeading: false,
         ),
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerScrolling) {
-            return [
-              SliverToBoxAdapter(child: _ProfileHeader()),
-              // --- Stats Row ---
-              SliverToBoxAdapter(
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _statColumn('ทริป', _myTrips.length.toString()),
-                      const SizedBox(width: 40),
-                      _statColumn('บล็อก', _myBlogs.length.toString()),
-                      const SizedBox(width: 40),
-                      _statColumn('คะแนน', '67'),
-                    ],
-                  ),
-                ),
-              ),
-              // --- TabBar ---
-              SliverPersistentHeader(
-                delegate: _StickyTabBarDelegate(
-                  tabBar: const TabBar(
-                    labelColor: Color(0xFF00BCD4),
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: Color(0xFF00BCD4),
-                    indicatorWeight: 3,
-                    labelStyle: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : NestedScrollView(
+                headerSliverBuilder: (context, innerScrolling) {
+                  return [
+                    SliverToBoxAdapter(child: _profileHeader()),
+                    // --- Stats Row ---
+                    SliverToBoxAdapter(
+                      child: Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _statColumn('ทริป', _myTrips.length.toString()),
+                            const SizedBox(width: 40),
+                            _statColumn('บล็อก', _myBlogs.length.toString()),
+                            const SizedBox(width: 40),
+                            _statColumn('คะแนน', '67'),
+                          ],
+                        ),
+                      ),
                     ),
-                    tabs: [
-                      Tab(text: 'ทริปของฉัน'),
-                      Tab(text: 'บล็อกของฉัน'),
-                    ],
-                  ),
+                    // --- TabBar ---
+                    SliverPersistentHeader(
+                      delegate: _StickyTabBarDelegate(
+                        tabBar: const TabBar(
+                          labelColor: Color(0xFF00BCD4),
+                          unselectedLabelColor: Colors.grey,
+                          indicatorColor: Color(0xFF00BCD4),
+                          indicatorWeight: 3,
+                          labelStyle: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          tabs: [
+                            Tab(text: 'ทริปของฉัน'),
+                            Tab(text: 'บล็อกของฉัน'),
+                          ],
+                        ),
+                      ),
+                      pinned: true,
+                    ),
+                  ];
+                },
+                body: TabBarView(
+                  children: [
+                    // ===== Tab 1: My Trips =====
+                    _TripTabContent(trips: _myTrips),
+                    // ===== Tab 2: My Blogs =====
+                    _BlogTabContent(blogs: _myBlogs),
+                  ],
                 ),
-                pinned: true,
               ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              // ===== Tab 1: My Trips =====
-              _TripTabContent(trips: _myTrips),
-              // ===== Tab 2: My Blogs =====
-              _BlogTabContent(blogs: _myBlogs),
-            ],
-          ),
-        ),
         bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
       ),
     );
@@ -187,25 +227,23 @@ class ProfileScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundImage: const NetworkImage(
-              'https://media.tenor.com/Yc03a6WmAYsAAAAe/cj-chorando-de-felicidade.png',
-              // 'https://ui-avatars.com/api/?name=Jedsada&background=00BCD4&color=fff&size=200',
+            backgroundImage: CachedNetworkImageProvider(
+              _photoUrl != null && _photoUrl!.isNotEmpty
+                  ? _photoUrl!
+                  : 'https://ui-avatars.com/api/?name=$_username&background=00BCD4&color=fff&size=200',
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Carl Johnson',
-            style: TextStyle(
+          Text(
+            _username,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            'jedsada@example.com',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-          ),
+          Text(_email, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () {},
@@ -224,8 +262,6 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget _ProfileHeader() => _profileHeader();
 
   // --- stat column helper ---
   Widget _statColumn(String label, String value) {

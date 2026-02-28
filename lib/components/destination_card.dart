@@ -10,13 +10,13 @@ class DestinationCard extends StatelessWidget {
   final double width; // เพิ่ม parameter สำหรับกำหนดความกว้าง
 
   const DestinationCard({
-    Key? key,
+    super.key,
     required this.destination,
     this.onFavoriteToggle,
     this.onTap,
     this.height = 280, // ความสูงเริ่มต้น 280 pixels
     this.width = 200, // ความกว้างเริ่มต้น 200 pixels
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

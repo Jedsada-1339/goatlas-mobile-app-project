@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/place_model.dart';
 import '../models/sample_data.dart';
 import '../components/cached_image_with_placeholder.dart';
+import '../services/tat_api_service.dart';
 
 /// หน้าเพิ่มสถานที่ให้กับทริป
 class AddPlaceScreen extends StatefulWidget {
-  const AddPlaceScreen({Key? key}) : super(key: key);
+  const AddPlaceScreen({super.key});
 
   @override
   State<AddPlaceScreen> createState() => _AddPlaceScreenState();
@@ -14,14 +15,51 @@ class AddPlaceScreen extends StatefulWidget {
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'ทั้งหมด';
-
-  // ใช้ข้อมูลจาก SampleData
-  late List<PlaceModel> _allPlaces;
+  // ใช้ข้อมูลจาก API
+  List<PlaceModel> _allPlaces = [];
+  bool _isLoading = true;
+  final TatApiService _tatApiService = TatApiService();
 
   @override
   void initState() {
     super.initState();
-    _allPlaces = SampleData.places;
+    _loadPlaces();
+  }
+
+  Future<void> _loadPlaces() async {
+    try {
+      final destinations = await _tatApiService.fetchPlaces(limit: 50);
+
+      final mappedPlaces = destinations.map((d) {
+        return PlaceModel(
+          id: d.id,
+          name: d.name,
+          description: d.description.isNotEmpty
+              ? d.description
+              : 'ไม่มีรายละเอียด',
+          category: d.category,
+          imageUrl: d.imageUrl,
+          location: d.location,
+          rating: d.rating,
+          duration: '1-2 ชม.',
+          latitude: d.latitude ?? 13.7563,
+          longitude: d.longitude ?? 100.5018,
+        );
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _allPlaces = mappedPlaces;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   List<PlaceModel> get _filteredPlaces {
@@ -209,6 +247,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   Widget _buildPlacesList() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final places = _filteredPlaces;
 
     if (places.isEmpty) {
@@ -336,22 +378,30 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        place.description,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF64748B),
+                      if (place.description.isNotEmpty &&
+                          place.description != 'ไม่มีรายละเอียด') ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          place.description,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
                           _buildPlaceChip(Icons.schedule, place.duration),
                           const SizedBox(width: 8),
-                          _buildPlaceChip(Icons.location_on, place.location),
+                          Flexible(
+                            child: _buildPlaceChip(
+                              Icons.location_on,
+                              place.location,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -395,12 +445,16 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         children: [
           Icon(icon, size: 12, color: const Color(0xFF94A3B8)),
           const SizedBox(width: 4),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF94A3B8),
+          Flexible(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF94A3B8),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

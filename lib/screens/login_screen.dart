@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 import '../utills/firebase_service.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -85,6 +86,72 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading = false;
           });
         }
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _firebaseService.signInWithGoogle();
+
+      if (userCredential != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('เข้าสู่ระบบด้วย Google สำเร็จ'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        String errMsg = 'เกิดข้อผิดพลาดจาก Firebase: ${e.message}';
+        if (e.code == 'account-exists-with-different-credential') {
+          errMsg = 'มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว แต่ผูกกับวิธีล็อกอินอื่น';
+        } else if (e.code == 'user-disabled') {
+          errMsg = 'บัญชี Google นี้ถูกระงับ';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
+        );
+      }
+    } on PlatformException catch (e) {
+      if (mounted) {
+        String errMsg = 'เกิดข้อผิดพลาดของระบบ: ${e.message}';
+        if (e.code == 'sign_in_failed') {
+          errMsg =
+              'การล็อกอินล้มเหลว (อาจมีปัญหาที่การตั้งค่า SHA-1 ใน Firebase)';
+        } else if (e.code == 'network_error') {
+          errMsg = 'ไม่มีการเชื่อมต่ออินเทอร์เน็ต';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -315,9 +382,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   // ปุ่ม Google Sign In
                   OutlinedButton.icon(
-                    onPressed: () {
-                      // TODO: Implement Google Sign In
-                    },
+                    onPressed: _isLoading ? null : _handleGoogleSignIn,
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(color: colorScheme.outline),

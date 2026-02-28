@@ -1,6 +1,4 @@
 import 'place_model.dart';
-import 'trip_model.dart';
-import 'day_plan_model.dart';
 
 /// ข้อมูลตัวอย่างสำหรับสถานที่ท่องเที่ยวในประเทศไทย
 class SampleData {
@@ -258,98 +256,6 @@ class SampleData {
       duration: '1-2 ชม.',
       latitude: 14.5492,
       longitude: 101.3725,
-    ),
-  ];
-
-  /// ทริปตัวอย่าง
-  static List<TripModel> get trips => [
-    TripModel(
-      id: 't1',
-      name: 'เชียงใหม่ 3 วัน 2 คืน',
-      coverImageUrl:
-          'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648',
-      startDate: DateTime(2025, 8, 15),
-      endDate: DateTime(2025, 8, 17),
-      isFavorite: true,
-      dayPlans: [
-        DayPlanModel(
-          dayNumber: 1,
-          hotelName: 'โรงแรมดาราเทวี',
-          places: [
-            places.firstWhere((p) => p.id == 'p1'), // วัดพระธาตุดอยสุเทพ
-            places.firstWhere((p) => p.id == 'p19'), // ม่อนแจ่ม คาเฟ่
-            places.firstWhere((p) => p.id == 'p4'), // ร้านข้าวซอยแม่สาย
-            places.firstWhere((p) => p.id == 'p3'), // ถนนคนเดินท่าแพ
-          ],
-        ),
-        DayPlanModel(
-          dayNumber: 2,
-          hotelName: 'โรงแรมดาราเทวี',
-          places: [
-            places.firstWhere((p) => p.id == 'p17'), // โรงแรม
-            places.firstWhere((p) => p.id == 'p2'), // ดอยอินทนนท์
-            places.firstWhere((p) => p.id == 'p19'), // ม่อนแจ่ม
-          ],
-        ),
-        DayPlanModel(
-          dayNumber: 3,
-          places: [places.firstWhere((p) => p.id == 'p3')],
-        ),
-      ],
-    ),
-    TripModel(
-      id: 't2',
-      name: 'ภูเก็ต-พังงา 4 วัน',
-      coverImageUrl:
-          'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a',
-      startDate: DateTime(2025, 9, 1),
-      endDate: DateTime(2025, 9, 4),
-      dayPlans: [
-        DayPlanModel(
-          dayNumber: 1,
-          hotelName: 'รีสอร์ทริมหาด',
-          places: [
-            places.firstWhere((p) => p.id == 'p18'), // รีสอร์ท
-            places.firstWhere((p) => p.id == 'p7'), // หาดป่าตอง
-            places.firstWhere((p) => p.id == 'p9'), // ร้านอาหาร
-          ],
-        ),
-        DayPlanModel(
-          dayNumber: 2,
-          hotelName: 'รีสอร์ทริมหาด',
-          places: [places.firstWhere((p) => p.id == 'p8')],
-        ),
-        DayPlanModel(
-          dayNumber: 3,
-          hotelName: 'รีสอร์ทริมหาด',
-          places: [places.firstWhere((p) => p.id == 'p6')],
-        ),
-        DayPlanModel(
-          dayNumber: 4,
-          places: [places.firstWhere((p) => p.id == 'p9')],
-        ),
-      ],
-    ),
-    TripModel(
-      id: 't3',
-      name: 'กรุงเทพฯ 2 วัน 1 คืน',
-      coverImageUrl:
-          'https://images.unsplash.com/photo-1563492065599-3520f775eeed',
-      startDate: DateTime(2025, 10, 5),
-      endDate: DateTime(2025, 10, 6),
-      dayPlans: [
-        DayPlanModel(
-          dayNumber: 1,
-          places: [
-            places.firstWhere((p) => p.id == 'p10'),
-            places.firstWhere((p) => p.id == 'p14'),
-          ],
-        ),
-        DayPlanModel(
-          dayNumber: 2,
-          places: [places.firstWhere((p) => p.id == 'p13')],
-        ),
-      ],
     ),
   ];
 

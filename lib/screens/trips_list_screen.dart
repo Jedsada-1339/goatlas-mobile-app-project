@@ -3,50 +3,61 @@ import '../components/custom_bottom_nav_bar.dart';
 
 import '../models/trip_model.dart';
 import '../models/sample_data.dart';
+import '../utills/firebase_service.dart';
 import 'create_trip_screen.dart';
 import 'trip_timeline_screen.dart';
 import '../components/trip_model_card.dart';
 
-/// หน้ารวมทริป - แสดงรายการทริปทั้งหมด
+/// หน้ารวมทริป - แสดงรายการทริปทั้งหมดจาก Firestore
 class TripsListScreen extends StatefulWidget {
-  const TripsListScreen({Key? key}) : super(key: key);
+  const TripsListScreen({super.key});
 
   @override
   State<TripsListScreen> createState() => _TripsListScreenState();
 }
 
 class _TripsListScreenState extends State<TripsListScreen> {
-  // ใช้ข้อมูลจาก SampleData
-  late List<TripModel> _trips;
+  final FirebaseService _firebaseService = FirebaseService();
   String _selectedCategory = 'ทั้งหมด';
-
-  @override
-  void initState() {
-    super.initState();
-    _trips = List.from(SampleData.trips);
-  }
 
   Color get primaryColor => Theme.of(context).primaryColor;
 
-  void _toggleFavorite(int index) {
-    setState(() {
-      _trips[index] = _trips[index].copyWith(
-        isFavorite: !_trips[index].isFavorite,
-      );
-    });
+  void _toggleFavorite(TripModel trip) async {
+    try {
+      await _firebaseService.toggleTripFavorite(trip.id, !trip.isFavorite);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('เกิดข้อผิดพลาด: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _deleteTrip(int index) {
-    final tripName = _trips[index].name;
-    setState(() {
-      _trips.removeAt(index);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('ลบทริป "$tripName" เรียบร้อยแล้ว'),
-        backgroundColor: primaryColor,
-      ),
-    );
+  void _deleteTrip(TripModel trip) async {
+    try {
+      await _firebaseService.deleteTrip(trip.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ลบทริป "${trip.name}" เรียบร้อยแล้ว'),
+            backgroundColor: primaryColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('เกิดข้อผิดพลาด: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -58,9 +69,29 @@ class _TripsListScreenState extends State<TripsListScreen> {
           children: [
             // Header
             _buildHeader(context),
-            // Main Content
+            // Main Content — StreamBuilder จาก Firestore
             Expanded(
-              child: _trips.isEmpty ? _buildEmptyState() : _buildTripsList(),
+              child: StreamBuilder<List<TripModel>>(
+                stream: _firebaseService.getTripsStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'),
+                    );
+                  }
+
+                  final trips = snapshot.data ?? [];
+
+                  if (trips.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  return _buildTripsList(trips);
+                },
+              ),
             ),
           ],
         ),
@@ -81,25 +112,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Back Button
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                // child: Material(
-                //   color: Colors.transparent,
-                //   child: InkWell(
-                //     borderRadius: BorderRadius.circular(20),
-                //     onTap: () => Navigator.pop(context),
-                //     child: const Icon(
-                //       Icons.chevron_left,
-                //       color: Color(0xFF64748B),
-                //     ),
-                //   ),
-                // ),
-              ),
+              const SizedBox(width: 40),
               // Title
               const Text(
                 'ทริปของฉัน',
@@ -234,7 +247,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
     );
   }
 
-  Widget _buildTripsList() {
+  Widget _buildTripsList(List<TripModel> trips) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 140),
@@ -242,7 +255,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Stats Section
-          _buildStatsSection(),
+          _buildStatsSection(trips),
           const SizedBox(height: 24),
           // Section Title
           Row(
@@ -258,17 +271,17 @@ class _TripsListScreenState extends State<TripsListScreen> {
                 ),
               ),
               Text(
-                '${_trips.length} ทริป',
+                '${trips.length} ทริป',
                 style: TextStyle(fontSize: 14, color: Colors.grey[400]),
               ),
             ],
           ),
           const SizedBox(height: 16),
           // Trips List
-          ...List.generate(_trips.length, (index) {
+          ...List.generate(trips.length, (index) {
             // Filter Logic
             if (_selectedCategory != 'ทั้งหมด') {
-              bool hasCategory = _trips[index].dayPlans.any((day) {
+              bool hasCategory = trips[index].dayPlans.any((day) {
                 return day.places.any(
                   (place) => place.category == _selectedCategory,
                 );
@@ -280,23 +293,22 @@ class _TripsListScreenState extends State<TripsListScreen> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: TripModelCard(
-                trip: _trips[index],
+                trip: trips[index],
                 onTap: () async {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          TripTimelineScreen(trip: _trips[index]),
+                          TripTimelineScreen(trip: trips[index]),
                     ),
                   );
                   if (result != null && result is TripModel) {
-                    setState(() {
-                      _trips[index] = result;
-                    });
+                    // บันทึกทริปที่อัพเดตลง Firestore
+                    await _firebaseService.saveTrip(result);
                   }
                 },
-                onFavoriteToggle: () => _toggleFavorite(index),
-                onDelete: () => _showDeleteConfirmation(index),
+                onFavoriteToggle: () => _toggleFavorite(trips[index]),
+                onDelete: () => _showDeleteConfirmation(trips[index]),
               ),
             );
           }),
@@ -305,12 +317,12 @@ class _TripsListScreenState extends State<TripsListScreen> {
     );
   }
 
-  Widget _buildStatsSection() {
-    final totalPlaces = _trips.fold<int>(
+  Widget _buildStatsSection(List<TripModel> trips) {
+    final totalPlaces = trips.fold<int>(
       0,
       (sum, trip) => sum + trip.totalPlaces,
     );
-    final totalDays = _trips.fold<int>(0, (sum, trip) => sum + trip.totalDays);
+    final totalDays = trips.fold<int>(0, (sum, trip) => sum + trip.totalDays);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -334,7 +346,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
         children: [
           _buildStatItem(
             icon: Icons.map_outlined,
-            value: '${_trips.length}',
+            value: '${trips.length}',
             label: 'ทริปทั้งหมด',
           ),
           Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
@@ -380,7 +392,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
     );
   }
 
-  void _showDeleteConfirmation(int index) {
+  void _showDeleteConfirmation(TripModel trip) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -394,7 +406,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
           ),
         ),
         content: Text(
-          'ต้องการลบทริป "${_trips[index].name}" หรือไม่?\nการดำเนินการนี้ไม่สามารถย้อนกลับได้',
+          'ต้องการลบทริป "${trip.name}" หรือไม่?\nการดำเนินการนี้ไม่สามารถย้อนกลับได้',
           style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
         ),
         actions: [
@@ -411,7 +423,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _deleteTrip(index);
+              _deleteTrip(trip);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEF4444),
@@ -443,9 +455,8 @@ class _TripsListScreenState extends State<TripsListScreen> {
             MaterialPageRoute(builder: (context) => const CreateTripScreen()),
           );
           if (result != null && result is TripModel) {
-            setState(() {
-              _trips.add(result);
-            });
+            // บันทึกทริปใหม่ลง Firestore
+            await _firebaseService.saveTrip(result);
           }
         },
         style: ElevatedButton.styleFrom(

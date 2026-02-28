@@ -7,12 +7,12 @@ class CustomSearchBar extends StatelessWidget {
   final VoidCallback? onSearchPressed;
 
   const CustomSearchBar({
-    Key? key,
+    super.key,
     this.controller,
     this.hintText = 'ค้นหาสถานที่ท่องเที่ยวที่คุณต้องการ',
     this.onChanged,
     this.onSearchPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
