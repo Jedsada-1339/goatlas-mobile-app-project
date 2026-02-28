@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/trip_model.dart';
 
 class FirebaseService {
@@ -51,10 +52,10 @@ class FirebaseService {
     try {
       print('--- เริ่มกระบวนการ Google Sign-In ---');
 
-      // บังคับให้โหลด Client ID จากเว็บเสมอ (จาก file google-services.json -> oauth_client type 3)
+      // โหลด Client ID จาก .env
+      final String? serverClientId = dotenv.env['GOOGLE_SERVER_CLIENT_ID'];
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        serverClientId:
-            '534980312634-fuvft8j28ilhu23tg3pk25a81mv4drga.apps.googleusercontent.com',
+        serverClientId: serverClientId,
       );
 
       // เคลียร์ session เก่าที่อาจจะค้างอยู่

@@ -91,16 +91,24 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 title: const Text('เลือกจากแกลเลอรี่'),
                 onTap: () async {
                   Navigator.pop(context);
-                  final XFile? image = await _imagePicker.pickImage(
-                    source: ImageSource.gallery,
-                    maxWidth: 1200,
-                    maxHeight: 800,
-                    imageQuality: 85,
-                  );
-                  if (image != null) {
-                    setState(() {
-                      _localImagePath = image.path;
-                    });
+                  try {
+                    final XFile? image = await _imagePicker.pickImage(
+                      source: ImageSource.gallery,
+                      maxWidth: 1200,
+                      maxHeight: 800,
+                      imageQuality: 85,
+                    );
+                    if (image != null) {
+                      setState(() {
+                        _localImagePath = image.path;
+                      });
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error picking image: $e')),
+                      );
+                    }
                   }
                 },
               ),
@@ -116,16 +124,24 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                 title: const Text('ถ่ายรูป'),
                 onTap: () async {
                   Navigator.pop(context);
-                  final XFile? image = await _imagePicker.pickImage(
-                    source: ImageSource.camera,
-                    maxWidth: 1200,
-                    maxHeight: 800,
-                    imageQuality: 85,
-                  );
-                  if (image != null) {
-                    setState(() {
-                      _localImagePath = image.path;
-                    });
+                  try {
+                    final XFile? image = await _imagePicker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 1200,
+                      maxHeight: 800,
+                      imageQuality: 85,
+                    );
+                    if (image != null) {
+                      setState(() {
+                        _localImagePath = image.path;
+                      });
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error taking photo: $e')),
+                      );
+                    }
                   }
                 },
               ),
