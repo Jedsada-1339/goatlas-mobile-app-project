@@ -7,7 +7,7 @@ import '../models/blog_model.dart';
 class BlogInformationScreen extends StatelessWidget {
   final BlogPost post;
 
-  const BlogInformationScreen({Key? key, required this.post}) : super(key: key);
+  const BlogInformationScreen({super.key, required this.post});
 
   @override
   Widget build(BuildContext context) {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>534980312634-qjsjtrq60vakqi13rscbo22de0gds3ju.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.534980312634-qjsjtrq60vakqi13rscbo22de0gds3ju</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>534980312634-v9mni2br65meqpei8uh5b8vko5i0s8je.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCqvv-AaMvJ4-VXEjt5wbpA6vIhkRIhlr4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>534980312634</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.goatlas</string>
+	<key>PROJECT_ID</key>
+	<string>goatlas-database-moblieapp-kku</string>
+	<key>STORAGE_BUCKET</key>
+	<string>goatlas-database-moblieapp-kku.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:534980312634:ios:e2ad5eb7f60c9275fc3f03</string>
+	<key>DATABASE_URL</key>
+	<string>https://goatlas-database-moblieapp-kku-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>

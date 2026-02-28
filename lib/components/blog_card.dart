@@ -11,13 +11,13 @@ class BlogCard extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
 
   const BlogCard({
-    Key? key,
+    super.key,
     required this.post,
     this.onTap,
     this.width = 320,
     this.showPostImage = true,
     this.margin,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

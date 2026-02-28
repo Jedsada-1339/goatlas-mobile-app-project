@@ -10,13 +10,13 @@ class TripCard extends StatelessWidget {
   final double width; // เพิ่ม parameter สำหรับกำหนดความกว้าง
 
   const TripCard({
-    Key? key,
+    super.key,
     required this.trip,
     this.onFavoriteToggle,
     this.onTap,
     this.height = 280, // ความสูงเริ่มต้น 280 pixels
     this.width = 200, // ความกว้างเริ่มต้น 200 pixels
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,6 @@ class TripCard extends StatelessWidget {
       child: Container(
         width: width,
         height: height,
-        margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [

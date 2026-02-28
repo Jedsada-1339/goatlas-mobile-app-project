@@ -6,7 +6,7 @@ import '../components/blog_card.dart';
 import '../models/blog_model.dart';
 
 class BlogScreen extends StatefulWidget {
-  const BlogScreen({Key? key}) : super(key: key);
+  const BlogScreen({super.key});
 
   @override
   State<BlogScreen> createState() => _BlogScreenState();

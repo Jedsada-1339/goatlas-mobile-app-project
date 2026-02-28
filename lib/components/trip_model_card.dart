@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/trip_model.dart';
 import 'cached_image_with_placeholder.dart';
@@ -9,12 +10,52 @@ class TripModelCard extends StatelessWidget {
   final VoidCallback? onDelete;
 
   const TripModelCard({
-    Key? key,
+    super.key,
     required this.trip,
     this.onTap,
     this.onFavoriteToggle,
     this.onDelete,
-  }) : super(key: key);
+  });
+
+  Widget _buildCoverImage() {
+    final url = trip.coverImageUrl;
+
+    // Local file path
+    if (url.isNotEmpty && !url.startsWith('http')) {
+      final file = File(url);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          width: double.infinity,
+          height: 160,
+          fit: BoxFit.cover,
+        );
+      }
+    }
+
+    // Network URL
+    if (url.isNotEmpty && url.startsWith('http')) {
+      return CachedImageWithPlaceholder(
+        imageUrl: url,
+        width: double.infinity,
+        height: 160,
+        fit: BoxFit.cover,
+        errorWidget: _buildPlaceholder(),
+      );
+    }
+
+    // Empty / fallback
+    return _buildPlaceholder();
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 160,
+      color: const Color(0xFFE2E8F0),
+      child: const Icon(Icons.landscape, size: 60, color: Colors.grey),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,22 +83,7 @@ class TripModelCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  CachedImageWithPlaceholder(
-                    imageUrl: trip.coverImageUrl,
-                    width: double.infinity,
-                    height: 160,
-                    fit: BoxFit.cover,
-                    errorWidget: Container(
-                      width: double.infinity,
-                      height: 160,
-                      color: Colors.grey[300],
-                      child: const Icon(
-                        Icons.landscape,
-                        size: 60,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
+                  _buildCoverImage(),
                   // Gradient Overlay
                   Positioned(
                     bottom: 0,

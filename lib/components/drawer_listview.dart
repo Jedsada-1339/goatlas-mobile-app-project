@@ -9,7 +9,7 @@ import '../utills/firebase_service.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // เพิ่ม import สำหรับ FirebaseAuth
 
 class DrawerListview extends StatefulWidget {
-  const DrawerListview({Key? key}) : super(key: key);
+  const DrawerListview({super.key});
 
   @override
   State<DrawerListview> createState() => _DrawerListviewState();
@@ -92,7 +92,7 @@ class _DrawerListviewState extends State<DrawerListview> {
                 const SizedBox(height: 12),
                 // Name
                 Text(
-                  '$_username',
+                  _username,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -102,7 +102,7 @@ class _DrawerListviewState extends State<DrawerListview> {
                 const SizedBox(height: 4),
                 // Email
                 Text(
-                  '$_email',
+                  _email,
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
                 const SizedBox(height: 16),
