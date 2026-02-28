@@ -4,81 +4,14 @@ import 'package:goatlas/screens/create_blog_screen.dart';
 import '../components/custom_bottom_nav_bar.dart';
 import '../components/blog_card.dart';
 import '../models/blog_model.dart';
+import '../components/blog_service.dart';
 
-class BlogScreen extends StatefulWidget {
-  const BlogScreen({super.key});
-
-  @override
-  State<BlogScreen> createState() => _BlogScreenState();
-}
-
-class _BlogScreenState extends State<BlogScreen> {
-  final List<BlogPost> _userBlogPosts = [];
-  late final List<BlogPost> _sampleBlogPosts;
-
-  @override
-  void initState() {
-    super.initState();
-    _sampleBlogPosts = _getSampleBlogPosts();
-  }
-
-  List<BlogPost> _getSampleBlogPosts() {
-    return [
-      BlogPost(
-        id: '1',
-        title: 'เที่ยวญี่ปุ่นครั้งแรก ต้องรู้อะไรบ้าง?',
-        content: '...',
-        authorName: 'สมชาย ใจดี',
-        authorAvatar: '',
-        coverImage:
-            'https://imgcp.aacdn.jp/img-a/1440/auto/global-aaj-front/article/2017/06/595048184fa06_5950474045019_1189093891.jpg',
-        publishedDate: DateTime.now().subtract(const Duration(hours: 5)),
-        readTime: 8,
-        likes: 245,
-        comments: 32,
-        tags: ['เที่ยวญี่ปุ่น', 'ครั้งแรก'],
-      ),
-      BlogPost(
-        id: '2',
-        title: '10 ที่เที่ยวต้องห้ามพลาดในโตเกียว',
-        content: '...',
-        authorName: 'ปรียา สุขสันต์',
-        authorAvatar: '',
-        coverImage:
-            'https://imgcp.aacdn.jp/img-a/1440/auto/global-aaj-front/article/2017/06/595048184fa06_5950474045019_1189093891.jpg',
-        publishedDate: DateTime.now().subtract(const Duration(days: 2)),
-        readTime: 12,
-        likes: 189,
-        comments: 25,
-        tags: ['โตเกียว', 'ที่เที่ยว'],
-      ),
-      BlogPost(
-        id: '3',
-        title: 'คู่มือกินอาหารญี่ปุ่นฉบับมือใหม่',
-        content: '...',
-        authorName: 'วิชัย รักเที่ยว',
-        authorAvatar: '',
-        coverImage:
-            'https://imgcp.aacdn.jp/img-a/1440/auto/global-aaj-front/article/2017/06/595048184fa06_5950474045019_1189093891.jpg',
-        publishedDate: DateTime.now().subtract(const Duration(days: 5)),
-        readTime: 10,
-        likes: 312,
-        comments: 48,
-        tags: ['อาหาร', 'คู่มือ'],
-      ),
-    ];
-  }
+class BlogScreen extends StatelessWidget {
+  const BlogScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    /// รวมทั้งหมด
-    final allPosts = [..._userBlogPosts, ..._sampleBlogPosts];
-
-    /// เรียงตาม likes มาก -> น้อย
-    final popularPosts = [...allPosts]
-      ..sort((a, b) => b.likes.compareTo(a.likes));
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -87,53 +20,81 @@ class _BlogScreenState extends State<BlogScreen> {
           children: [
             _buildHeader(context, colorScheme),
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildIntroSection(colorScheme),
+              // ─── StreamBuilder ดึงข้อมูล Firestore แบบ real-time ───
+              child: StreamBuilder<List<BlogPost>>(
+                stream: BlogService.instance.getBlogsStream(),
+                builder: (context, snapshot) {
+                  // กำลังโหลด
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                    /// ===== POPULAR =====
-                    if (popularPosts.isNotEmpty)
-                      _buildPopularSection(popularPosts, colorScheme),
+                  // เกิด Error
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'),
+                    );
+                  }
 
-                    const SizedBox(height: 24),
+                  final allPosts = snapshot.data ?? [];
 
-                    /// ===== RECENT =====
-                    _buildRecentSection(allPosts),
+                  // ไม่มีข้อมูล
+                  if (allPosts.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'ยังไม่มีบทความ\nกด + เพื่อเพิ่มบทความแรก!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    );
+                  }
 
-                    const SizedBox(height: 80),
-                  ],
-                ),
+                  // เรียงตาม likes มาก → น้อย
+                  final popularPosts = [...allPosts]
+                    ..sort((a, b) => b.likes.compareTo(a.likes));
+
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildIntroSection(colorScheme),
+                        if (popularPosts.isNotEmpty)
+                          _buildPopularSection(
+                            popularPosts,
+                            colorScheme,
+                            context,
+                          ),
+                        const SizedBox(height: 24),
+                        _buildRecentSection(allPosts, context),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
 
-      /// FAB
+      // FAB → เปิดหน้าสร้างบทความ
       floatingActionButton: FloatingActionButton(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
-        tooltip: "เพิ่มบทความ",
-        shape: CircleBorder(),
-        onPressed: () async {
-          final result = await Navigator.push(
+        tooltip: 'เพิ่มบทความ',
+        shape: const CircleBorder(),
+        onPressed: () {
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const CreateBlogScreen(
-                authorName: 'ชื่อผู้ใช้',
+                authorName: 'ชื่อผู้ใช้', // TODO: ใส่ชื่อจาก Auth
                 authorAvatar: '',
               ),
             ),
           );
-
-          if (result != null && result is BlogPost) {
-            setState(() {
-              _userBlogPosts.insert(0, result);
-            });
-          }
+          // ไม่ต้อง setState แล้ว เพราะ StreamBuilder อัปเดตอัตโนมัติ
         },
         child: const Icon(Icons.add),
       ),
@@ -169,6 +130,7 @@ class _BlogScreenState extends State<BlogScreen> {
   Widget _buildPopularSection(
     List<BlogPost> popularPosts,
     ColorScheme colorScheme,
+    BuildContext context,
   ) {
     return Padding(
       padding: const EdgeInsets.only(left: 20),
@@ -192,15 +154,13 @@ class _BlogScreenState extends State<BlogScreen> {
               itemBuilder: (context, index) {
                 return BlogCard(
                   post: popularPosts[index],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            BlogInformationScreen(post: popularPosts[index]),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          BlogInformationScreen(post: popularPosts[index]),
+                    ),
+                  ),
                 );
               },
             ),
@@ -210,7 +170,7 @@ class _BlogScreenState extends State<BlogScreen> {
     );
   }
 
-  Widget _buildRecentSection(List<BlogPost> posts) {
+  Widget _buildRecentSection(List<BlogPost> posts, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -232,15 +192,12 @@ class _BlogScreenState extends State<BlogScreen> {
                   post: posts[index],
                   width: double.infinity,
                   margin: EdgeInsets.zero,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            BlogInformationScreen(post: posts[index]),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlogInformationScreen(post: posts[index]),
+                    ),
+                  ),
                 ),
               );
             },

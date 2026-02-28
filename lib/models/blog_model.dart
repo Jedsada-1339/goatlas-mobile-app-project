@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class BlogPost {
   final String id;
   final String title;
@@ -6,7 +8,7 @@ class BlogPost {
   final String authorAvatar;
   final String coverImage;
   final DateTime publishedDate;
-  final int readTime; // นาทีในการอ่าน
+  final int readTime;
   final int likes;
   final int comments;
   final List<String> tags;
@@ -24,6 +26,41 @@ class BlogPost {
     this.comments = 0,
     this.tags = const [],
   });
+
+  // แปลงจาก Firestore → BlogPost
+  factory BlogPost.fromMap(String id, Map<String, dynamic> map) {
+    return BlogPost(
+      id: id,
+      title: map['title'] ?? '',
+      content: map['content'] ?? '',
+      authorName: map['authorName'] ?? '',
+      authorAvatar: map['authorAvatar'] ?? '',
+      coverImage: map['coverImage'] ?? '',
+      publishedDate: map['publishedDate'] is Timestamp
+          ? (map['publishedDate'] as Timestamp).toDate()
+          : DateTime.now(),
+      readTime: map['readTime'] ?? 5,
+      likes: map['likes'] ?? 0,
+      comments: map['comments'] ?? 0,
+      tags: List<String>.from(map['tags'] ?? []),
+    );
+  }
+
+  // แปลงจาก BlogPost → Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'content': content,
+      'authorName': authorName,
+      'authorAvatar': authorAvatar,
+      'coverImage': coverImage,
+      'publishedDate': Timestamp.fromDate(publishedDate),
+      'readTime': readTime,
+      'likes': likes,
+      'comments': comments,
+      'tags': tags,
+    };
+  }
 
   // คำนวณเวลาที่ผ่านมา
   String get timeAgo {
