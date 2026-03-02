@@ -1,13 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:goatlas/components/custom_bottom_nav_bar.dart';
-import '../components/cached_image_with_placeholder.dart';
 import '../models/blog_model.dart';
+import 'dart:convert';
 
 class BlogInformationScreen extends StatelessWidget {
   final BlogPost post;
 
   const BlogInformationScreen({super.key, required this.post});
+
+  Widget _buildImage(String imageData) {
+    // ตรวจสอบว่าเป็น Base64 หรือไม่
+    if (imageData.startsWith('data:image')) {
+      try {
+        // ตัด "data:image/jpeg;base64," ออก
+        final base64String = imageData.split(',').last;
+        final bytes = base64Decode(base64String);
+
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.grey[300],
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.grey[500],
+                size: 50,
+              ),
+            );
+          },
+        );
+      } catch (e) {
+        return Container(
+          color: Colors.grey[300],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: Colors.grey[500], size: 50),
+              const SizedBox(height: 8),
+              Text(
+                'ไม่สามารถโหลดรูปภาพได้',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        );
+      }
+    } else {
+      // ถ้าเป็น URL ใช้ CachedNetworkImage
+      return CachedNetworkImage(
+        imageUrl: imageData,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[200],
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[300],
+          child: Icon(Icons.broken_image, color: Colors.grey[500], size: 50),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +134,9 @@ class BlogInformationScreen extends StatelessWidget {
                         backgroundColor: const Color(0xFF00BCD4),
                         child: post.authorAvatar.isEmpty
                             ? Text(
-                                post.authorName[0].toUpperCase(),
+                                post.authorName.isNotEmpty
+                                    ? post.authorName[0].toUpperCase()
+                                    : '?',
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
@@ -159,10 +218,7 @@ class BlogInformationScreen extends StatelessWidget {
                       child: SizedBox(
                         height: 240,
                         width: double.infinity,
-                        child: CachedFullImage(
-                          imageUrl: post.coverImage,
-                          fit: BoxFit.cover,
-                        ),
+                        child: _buildImage(post.coverImage),
                       ),
                     ),
                   ),

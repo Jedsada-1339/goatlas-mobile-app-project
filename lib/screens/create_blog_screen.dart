@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/blog_model.dart';
 import '../components/blog_service.dart';
+import 'dart:convert';
 
 class CreateBlogScreen extends StatefulWidget {
   final String authorName;
@@ -25,6 +26,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
   final _tagController = TextEditingController();
 
   File? _coverImageFile; // รูปที่เลือกจากเครื่อง
+  String? _coverImageBase64;
   List<String> _tags = [];
   bool _isLoading = false;
 
@@ -36,23 +38,29 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     super.dispose();
   }
 
-  // ─────────────────────────────────────────────
   // เลือกรูปปก
-  // ─────────────────────────────────────────────
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 80, // บีบอัดให้เล็กลงนิดนึง
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 85,
     );
+
     if (picked != null) {
-      setState(() => _coverImageFile = File(picked.path));
+      final bytes = await picked.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      setState(() {
+        _coverImageFile = File(picked.path);
+        _coverImageBase64 =
+            'data:image/jpeg;base64,$base64Image'; // เหมือน trip
+      });
     }
   }
 
-  // ─────────────────────────────────────────────
   // เพิ่ม Tag
-  // ─────────────────────────────────────────────
   void _addTag(String tag) {
     final trimmed = tag.trim();
     if (trimmed.isNotEmpty && !_tags.contains(trimmed) && _tags.length < 5) {
@@ -63,9 +71,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     }
   }
 
-  // ─────────────────────────────────────────────
   // บันทึกบทความ → Firebase
-  // ─────────────────────────────────────────────
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_coverImageFile == null) {
@@ -78,29 +84,25 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. อัปโหลดรูปไป Firebase Storage → ได้ URL
-      final imageUrl = await BlogService.instance.uploadCoverImage(
-        _coverImageFile!,
-      );
-
-      // 2. คำนวณเวลาอ่านคร่าวๆ (~200 คำ/นาที)
+      // คำนวณเวลาอ่าน
       final wordCount = _contentController.text.trim().split(' ').length;
       final readTime = (wordCount / 200).ceil().clamp(1, 60);
 
-      // 3. สร้าง BlogPost object
+      // สร้าง BlogPost
       final newPost = BlogPost(
         id: '', // Firestore จะสร้าง ID ให้
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         authorName: widget.authorName,
         authorAvatar: widget.authorAvatar,
-        coverImage: imageUrl,
+        coverImage: _coverImageBase64!, // เก็บ Base64 string
         publishedDate: DateTime.now(),
         readTime: readTime,
         tags: _tags,
+        images: [_coverImageBase64!], // เพิ่ม Base64 ใน images ด้วย
       );
 
-      // 4. บันทึกลง Firestore
+      // บันทึกลง Firestore
       await BlogService.instance.createBlog(newPost);
 
       if (mounted) {
@@ -110,7 +112,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // กลับหน้า BlogScreen (StreamBuilder อัปเดตเอง)
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {

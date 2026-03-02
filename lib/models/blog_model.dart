@@ -12,6 +12,7 @@ class BlogPost {
   final int likes;
   final int comments;
   final List<String> tags;
+  final List<String> images;
 
   BlogPost({
     required this.id,
@@ -25,29 +26,31 @@ class BlogPost {
     this.likes = 0,
     this.comments = 0,
     this.tags = const [],
+    this.images = const [],
   });
 
   // แปลงจาก Firestore → BlogPost
-  factory BlogPost.fromMap(String id, Map<String, dynamic> map) {
+  factory BlogPost.fromJson(Map<String, dynamic> json) {
     return BlogPost(
-      id: id,
-      title: map['title'] ?? '',
-      content: map['content'] ?? '',
-      authorName: map['authorName'] ?? '',
-      authorAvatar: map['authorAvatar'] ?? '',
-      coverImage: map['coverImage'] ?? '',
-      publishedDate: map['publishedDate'] is Timestamp
-          ? (map['publishedDate'] as Timestamp).toDate()
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      content: json['content'] ?? '',
+      authorName: json['authorName'] ?? '',
+      authorAvatar: json['authorAvatar'] ?? '',
+      coverImage: json['coverImage'] ?? '',
+      publishedDate: json['publishedDate'] is Timestamp
+          ? (json['publishedDate'] as Timestamp).toDate()
           : DateTime.now(),
-      readTime: map['readTime'] ?? 5,
-      likes: map['likes'] ?? 0,
-      comments: map['comments'] ?? 0,
-      tags: List<String>.from(map['tags'] ?? []),
+      readTime: json['readTime'] ?? 5,
+      likes: json['likes'] ?? 0,
+      comments: json['comments'] ?? 0,
+      tags: List<String>.from(json['tags'] ?? []),
+      images: List<String>.from(json['images'] ?? []),
     );
   }
 
   // แปลงจาก BlogPost → Firestore
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'title': title,
       'content': content,
@@ -59,6 +62,7 @@ class BlogPost {
       'likes': likes,
       'comments': comments,
       'tags': tags,
+      'images': images,
     };
   }
 

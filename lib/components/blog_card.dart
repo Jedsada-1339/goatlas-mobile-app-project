@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/blog_model.dart';
 import 'cached_image_with_placeholder.dart';
+import 'dart:convert';
 
 class BlogCard extends StatelessWidget {
   final BlogPost post;
@@ -18,6 +19,41 @@ class BlogCard extends StatelessWidget {
     this.showPostImage = true,
     this.margin,
   });
+
+  Widget _buildCoverImage(String imageData, double width) {
+    if (imageData.startsWith('data:image')) {
+      try {
+        final base64String = imageData.split(',').last;
+        return Image.memory(
+          base64Decode(base64String),
+          width: width,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _imagePlaceholder(width),
+        );
+      } catch (_) {
+        return _imagePlaceholder(width);
+      }
+    } else {
+      return CachedNetworkImage(
+        imageUrl: imageData,
+        width: width,
+        height: 180,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => _imagePlaceholder(width),
+        errorWidget: (_, __, ___) => _imagePlaceholder(width),
+      );
+    }
+  }
+
+  Widget _imagePlaceholder(double width) {
+    return Container(
+      width: width,
+      height: 180,
+      color: Colors.grey[200],
+      child: Icon(Icons.image_outlined, color: Colors.grey[400], size: 48),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +76,13 @@ class BlogCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cover Image - สามารถแก้ไข URL ภาพได้ภายหลัง
+            // Cover Image
             if (showPostImage && post.coverImage.isNotEmpty)
-              CachedCardImage(
-                imageUrl: post.coverImage,
-                width: width,
-                height: 180,
-                fit: BoxFit.cover,
-                borderRadius: 16,
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+                child: _buildCoverImage(post.coverImage, width),
               ),
 
             // Content
@@ -126,12 +161,9 @@ class BlogCard extends StatelessWidget {
                         backgroundColor: const Color(0xFF00BCD4),
                         child: post.authorAvatar.isEmpty
                             ? Text(
-                                post.authorName[0].toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
+                                post.authorName.isNotEmpty
+                                    ? post.authorName[0].toUpperCase()
+                                    : '?',
                               )
                             : null,
                       ),
