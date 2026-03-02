@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/trip_model.dart';
+import 'package:flutter/foundation.dart';
 
 class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -54,7 +55,11 @@ class FirebaseService {
 
       // โหลด Client ID จาก .env
       final String? serverClientId = dotenv.env['GOOGLE_SERVER_CLIENT_ID'];
+      final String? iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID'];
       final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: defaultTargetPlatform == TargetPlatform.iOS
+            ? iosClientId
+            : null,
         serverClientId: serverClientId,
       );
 
