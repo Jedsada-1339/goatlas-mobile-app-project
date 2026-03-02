@@ -5,6 +5,7 @@ import '../components/custom_bottom_nav_bar.dart';
 import '../components/blog_card.dart';
 import '../models/blog_model.dart';
 import '../components/blog_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BlogScreen extends StatelessWidget {
   const BlogScreen({Key? key}) : super(key: key);
@@ -84,23 +85,36 @@ class BlogScreen extends StatelessWidget {
         foregroundColor: colorScheme.onPrimary,
         tooltip: 'เพิ่มบทความ',
         shape: const CircleBorder(),
-        onPressed: () {
+        onPressed: () async {
+          final userInfo = await _getUserInfo(); // ดึงข้อมูล user
+          if (!context.mounted) return;
+
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const CreateBlogScreen(
-                authorName: 'ชื่อผู้ใช้', // TODO: ใส่ชื่อจาก Auth
-                authorAvatar: '',
+              builder: (context) => CreateBlogScreen(
+                authorName: userInfo['name']!,
+                authorAvatar: userInfo['avatar']!,
               ),
             ),
           );
-          // ไม่ต้อง setState แล้ว เพราะ StreamBuilder อัปเดตอัตโนมัติ
         },
         child: const Icon(Icons.add),
       ),
 
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
     );
+  }
+
+  Future<Map<String, String>> _getUserInfo() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return {
+        'name': user.displayName ?? 'ผู้ใช้',
+        'avatar': user.photoURL ?? '',
+      };
+    }
+    return {'name': 'ผู้ใช้', 'avatar': ''};
   }
 
   Widget _buildIntroSection(ColorScheme colorScheme) {

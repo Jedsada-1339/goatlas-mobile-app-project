@@ -1,67 +1,79 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/blog_model.dart';
 
 class BlogService {
-  // Singleton pattern
+  static final instance = BlogService._();
   BlogService._();
-  static final BlogService instance = BlogService._();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
-  // Collection reference
-  CollectionReference<Map<String, dynamic>> get _blogsRef =>
-      _firestore.collection('blogs');
+  // ดึง userId ปัจจุบัน
+  String? get _currentUserId => _auth.currentUser?.uid;
 
-  // ─────────────────────────────────────────────
-  // READ: Stream ดึงบทความทั้งหมด (real-time)
-  // ─────────────────────────────────────────────
-  Stream<List<BlogPost>> getBlogsStream() {
-    return _blogsRef
-        .orderBy('publishedDate', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => BlogPost.fromMap(doc.id, doc.data()))
-              .toList(),
-        );
+  // Reference ไปที่ blogs ของ user ปัจจุบัน
+  CollectionReference? get _userBlogsCollection {
+    if (_currentUserId == null) return null;
+    return _firestore
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('blogs');
   }
 
   // ─────────────────────────────────────────────
-  // CREATE: เพิ่มบทความใหม่
+  // สร้างบทความใหม่
   // ─────────────────────────────────────────────
   Future<void> createBlog(BlogPost post) async {
-    await _blogsRef.add(post.toMap());
-  }
+    final collection = _userBlogsCollection;
+    if (collection == null) throw Exception('ไม่พบข้อมูลผู้ใช้');
 
-  // ─────────────────────────────────────────────
-  // UPLOAD: อัปโหลดรูปปก → คืน URL
-  // ─────────────────────────────────────────────
-  Future<String> uploadCoverImage(File imageFile) async {
-    final fileName = 'cover_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final ref = _storage.ref().child('blog_covers/$fileName');
-
-    final uploadTask = await ref.putFile(
-      imageFile,
-      SettableMetadata(contentType: 'image/jpeg'),
+    final docRef = collection.doc(); // สร้าง ID ใหม่
+    final newPost = BlogPost(
+      id: docRef.id,
+      title: post.title,
+      content: post.content,
+      authorName: post.authorName,
+      authorAvatar: post.authorAvatar,
+      coverImage: post.coverImage,
+      publishedDate: post.publishedDate,
+      readTime: post.readTime,
+      tags: post.tags,
+      images: post.images,
     );
 
-    return await uploadTask.ref.getDownloadURL();
+    await docRef.set(newPost.toJson());
   }
 
-  // ─────────────────────────────────────────────
-  // UPDATE: อัปเดต likes
-  // ─────────────────────────────────────────────
-  Future<void> likeBlog(String blogId, int currentLikes) async {
-    await _blogsRef.doc(blogId).update({'likes': currentLikes + 1});
+  // ดึงบทความทั้งหมดของ user (real-time)
+  Stream<List<BlogPost>> getBlogsStream() {
+    final collection = _userBlogsCollection;
+    if (collection == null) return Stream.value([]);
+
+    return collection
+        .orderBy('publishedDate', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return BlogPost.fromJson(data);
+          }).toList();
+        });
   }
 
-  // ─────────────────────────────────────────────
-  // DELETE: ลบบทความ
-  // ─────────────────────────────────────────────
+  // อัปเดตบทความ
+  Future<void> updateBlog(BlogPost post) async {
+    final collection = _userBlogsCollection;
+    if (collection == null) throw Exception('ไม่พบข้อมูลผู้ใช้');
+
+    await collection.doc(post.id).update(post.toJson());
+  }
+
+  // ลบบทความ
   Future<void> deleteBlog(String blogId) async {
-    await _blogsRef.doc(blogId).delete();
+    final collection = _userBlogsCollection;
+    if (collection == null) throw Exception('ไม่พบข้อมูลผู้ใช้');
+
+    await collection.doc(blogId).delete();
   }
 }
