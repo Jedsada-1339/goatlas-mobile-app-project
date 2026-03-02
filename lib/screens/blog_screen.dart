@@ -6,6 +6,7 @@ import '../components/blog_card.dart';
 import '../models/blog_model.dart';
 import '../components/blog_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utills/firebase_service.dart';
 
 class BlogScreen extends StatelessWidget {
   const BlogScreen({Key? key}) : super(key: key);
@@ -109,9 +110,11 @@ class BlogScreen extends StatelessWidget {
   Future<Map<String, String>> _getUserInfo() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      final firebaseService = FirebaseService();
+      final userData = await firebaseService.getUserData(user.uid);
       return {
-        'name': user.displayName ?? 'ผู้ใช้',
-        'avatar': user.photoURL ?? '',
+        'name': userData?['username'] ?? user.displayName ?? 'ผู้ใช้',
+        'avatar': userData?['photoUrl'] ?? user.photoURL ?? '',
       };
     }
     return {'name': 'ผู้ใช้', 'avatar': ''};
@@ -147,7 +150,7 @@ class BlogScreen extends StatelessWidget {
     BuildContext context,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -160,14 +163,17 @@ class BlogScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 400,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: popularPosts.length,
-              itemBuilder: (context, index) {
-                return BlogCard(
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: popularPosts.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: BlogCard(
                   post: popularPosts[index],
+                  width: double.infinity,
+                  margin: EdgeInsets.zero,
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -175,9 +181,9 @@ class BlogScreen extends StatelessWidget {
                           BlogInformationScreen(post: popularPosts[index]),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),

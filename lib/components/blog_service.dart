@@ -53,10 +53,50 @@ class BlogService {
     return collection
         .orderBy('publishedDate', descending: true)
         .snapshots()
-        .map((snapshot) {
+        .asyncMap((snapshot) async {
+          // ดึงข้อมูลโปรไฟล์ user
+          String userName = '';
+          String userAvatar = '';
+          final uid = _currentUserId;
+          if (uid != null) {
+            final userDoc = await _firestore.collection('users').doc(uid).get();
+            if (userDoc.exists) {
+              final userData = userDoc.data();
+              userName = userData?['username'] ?? '';
+              userAvatar = userData?['photoUrl'] ?? '';
+            }
+          }
+          // fallback จาก FirebaseAuth
+          final authUser = _auth.currentUser;
+          if (userName.isEmpty) {
+            userName = authUser?.displayName ?? 'ผู้ใช้';
+          }
+          if (userAvatar.isEmpty) {
+            userAvatar = authUser?.photoURL ?? '';
+          }
+
           return snapshot.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            return BlogPost.fromJson(data);
+            final post = BlogPost.fromJson(data);
+            // ใส่ชื่อ/รูปผู้เขียนถ้าข้อมูลว่าง
+            return BlogPost(
+              id: post.id,
+              title: post.title,
+              content: post.content,
+              authorName: post.authorName.isNotEmpty
+                  ? post.authorName
+                  : userName,
+              authorAvatar: post.authorAvatar.isNotEmpty
+                  ? post.authorAvatar
+                  : userAvatar,
+              coverImage: post.coverImage,
+              publishedDate: post.publishedDate,
+              readTime: post.readTime,
+              likes: post.likes,
+              comments: post.comments,
+              tags: post.tags,
+              images: post.images,
+            );
           }).toList();
         });
   }

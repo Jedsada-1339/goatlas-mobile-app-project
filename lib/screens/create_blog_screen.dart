@@ -62,13 +62,16 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
   // เพิ่ม Tag
   void _addTag(String tag) {
-    final trimmed = tag.trim();
-    if (trimmed.isNotEmpty && !_tags.contains(trimmed) && _tags.length < 5) {
-      setState(() {
-        _tags.add(trimmed);
-        _tagController.clear();
-      });
+    final parts = tag.split(',');
+    for (final part in parts) {
+      final trimmed = part.trim();
+      if (trimmed.isNotEmpty && !_tags.contains(trimmed) && _tags.length < 5) {
+        setState(() {
+          _tags.add(trimmed);
+        });
+      }
     }
+    _tagController.clear();
   }
 
   // บันทึกบทความ → Firebase

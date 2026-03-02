@@ -347,6 +347,7 @@ class _BlogTabContent extends StatelessWidget {
             child: BlogCard(
               post: blogs[index],
               width: double.infinity,
+              margin: EdgeInsets.zero,
               onTap: () {},
             ),
           ),

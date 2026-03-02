@@ -44,7 +44,17 @@ class BlogPost {
       readTime: json['readTime'] ?? 5,
       likes: json['likes'] ?? 0,
       comments: json['comments'] ?? 0,
-      tags: List<String>.from(json['tags'] ?? []),
+      tags:
+          (json['tags'] as List<dynamic>?)
+              ?.expand<String>(
+                (tag) => tag
+                    .toString()
+                    .split(',')
+                    .map((t) => t.trim())
+                    .where((t) => t.isNotEmpty),
+              )
+              .toList() ??
+          [],
       images: List<String>.from(json['images'] ?? []),
     );
   }
