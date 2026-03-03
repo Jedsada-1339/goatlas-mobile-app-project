@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../components/custom_bottom_nav_bar.dart';
-import '../components/trip_card.dart';
+import '../components/trip_card_for_profile.dart';
 import '../components/blog_card.dart';
-import '../models/trip.dart';
+import '../models/trip_model.dart';
 import '../models/blog_model.dart';
 import '../utills/firebase_service.dart';
+import '../components/blog_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -46,179 +47,133 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // --- Mock: ทริปที่เคยสร้าง ---
-  final List<Trip> _myTrips = [
-    Trip(
-      id: '1',
-      name: 'ขึ้นเขาสนุกจังโว้ย',
-      location: 'จังหวัดกระบี่',
-      imageUrl: 'https://f.ptcdn.info/660/065/000/pws6t51b9x7xqqUGVTC9-o.jpg',
-      category: 'ยอดนิยม',
-      isFavorite: true,
-      rating: 4.8,
-    ),
-    Trip(
-      id: '2',
-      name: 'ประวัติศาสตร์น่ารู้จัก',
-      location: 'พระนครศรีอยุธยา',
-      imageUrl:
-          'https://www.chula.ac.th/wp-content/uploads/2018/03/cu_inside_12032018.jpg',
-      category: 'วัฒนธรรม',
-      isFavorite: false,
-      rating: 4.6,
-    ),
-    Trip(
-      id: '3',
-      name: 'สวนสนุกหยุดไม่ได้',
-      location: 'จังหวัดเชียงใหม่',
-      imageUrl:
-          'https://mushroomtravelpage.b-cdn.net/wp-content/uploads/2021/11/1167203_1081989495160530_984361401416214698_o-1024x683.jpg',
-      category: 'ธรรมชาติ',
-      isFavorite: true,
-      rating: 4.9,
-    ),
-    Trip(
-      id: '4',
-      name: 'ดำน้ำเกาะสมุย',
-      location: 'จังหวัดสุราษฎร์ธานี',
-      imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19',
-      category: 'ยอดนิยม',
-      isFavorite: false,
-      rating: 4.7,
-    ),
-  ];
-
-  // --- Mock: บล็อกที่เคยโพส ---
-  final List<BlogPost> _myBlogs = [
-    BlogPost(
-      id: '1',
-      title: '10 สถานที่ท่องเที่ยวสุดฮิตในภาคเหนือ',
-      content:
-          'เที่ยวภาคเหนือต้องไปไหนบ้าง? เรามีคำตอบมาแนะนำ! จากเชียงใหม่ เชียงราย ไปจนถึงแม่ฮ่องสอน ที่เที่ยวสวยๆ เพียบ อากาศดี บรรยากาศชิลล์ๆ เหมาะกับการพักผ่อนและถ่ายรูปสวยๆ',
-      authorName: 'Jedsada',
-      authorAvatar:
-          'https://ui-avatars.com/api/?name=Jedsada&background=00BCD4&color=fff',
-      coverImage:
-          'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648',
-      publishedDate: DateTime.now().subtract(const Duration(hours: 5)),
-      readTime: 8,
-      likes: 245,
-      comments: 32,
-      tags: ['เที่ยวเหนือ', 'ธรรมชาติ'],
-    ),
-    BlogPost(
-      id: '2',
-      title: 'เที่ยวทะเลภาคใต้แบบประหยัด Budget 5,000 บาท',
-      content:
-          'อยากเที่ยวทะเลแต่งบจำกัด? ไม่ต้องกังวล! เรามีเคล็ดลับการเที่ยวทะเลภาคใต้แบบประหยัดมาแชร์ ทั้งที่พัก อาหาร และกิจกรรมสุดคุ้ม งบไม่เกิน 5,000 บาท',
-      authorName: 'Jedsada',
-      authorAvatar:
-          'https://ui-avatars.com/api/?name=Jedsada&background=00BCD4&color=fff',
-      coverImage: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19',
-      publishedDate: DateTime.now().subtract(const Duration(days: 1)),
-      readTime: 6,
-      likes: 189,
-      comments: 28,
-      tags: ['ทะเล', 'ประหยัด'],
-    ),
-    BlogPost(
-      id: '3',
-      title: 'ตะลุยกรุงเทพฯ 24 ชั่วโมง กินเที่ยวไม่มีเบื่อ',
-      content:
-          'มีเวลาในกรุงเทพฯ แค่ 24 ชั่วโมง? เราพาไปกินเที่ยวครบทุกมุม ตั้งแต่วัดสวยๆ ตลาดดัง ร้านอาหารเด็ด จนถึงคาเฟ่สุดชิค ครบทุกสไตล์!',
-      authorName: 'Jedsada',
-      authorAvatar:
-          'https://ui-avatars.com/api/?name=Jedsada&background=00BCD4&color=fff',
-      coverImage:
-          'https://images.unsplash.com/photo-1563492065599-3520f775eeed',
-      publishedDate: DateTime.now().subtract(const Duration(days: 2)),
-      readTime: 10,
-      likes: 312,
-      comments: 45,
-      tags: ['กรุงเทพฯ', 'อาหาร'],
-    ),
-  ];
+  void _toggleFavorite(TripModel trip) async {
+    try {
+      await _firebaseService.toggleTripFavorite(trip.id, !trip.isFavorite);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('เกิดข้อผิดพลาด: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text(
-            'โปรไฟล์',
-            style: TextStyle(
-              color: Color(0xFF0F172A),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black87),
-          automaticallyImplyLeading: false,
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : NestedScrollView(
-                headerSliverBuilder: (context, innerScrolling) {
-                  return [
-                    SliverToBoxAdapter(child: _profileHeader()),
-                    // --- Stats Row ---
-                    SliverToBoxAdapter(
-                      child: Container(
-                        color: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _statColumn('ทริป', _myTrips.length.toString()),
-                            const SizedBox(width: 40),
-                            _statColumn('บล็อก', _myBlogs.length.toString()),
-                            const SizedBox(width: 40),
-                            _statColumn('คะแนน', '67'),
-                          ],
-                        ),
-                      ),
+    return StreamBuilder<List<TripModel>>(
+      stream: _firebaseService.getTripsStream(),
+      builder: (context, tripSnapshot) {
+        final myTrips = tripSnapshot.data ?? [];
+
+        return StreamBuilder<List<BlogPost>>(
+          stream: BlogService.instance.getBlogsStream(),
+          builder: (context, blogSnapshot) {
+            // กรองเฉพาะบล็อกของ user ที่ล็อกอินอยู่
+            final allBlogs = blogSnapshot.data ?? [];
+            final myBlogs = allBlogs
+                .where((b) => b.authorName == _username)
+                .toList();
+
+            return DefaultTabController(
+              length: 2,
+              child: Scaffold(
+                backgroundColor: const Color(0xFFF5F5F5),
+                appBar: AppBar(
+                  centerTitle: true,
+                  title: const Text(
+                    'โปรไฟล์',
+                    style: TextStyle(
+                      color: Color(0xFF0F172A),
+                      fontWeight: FontWeight.w600,
                     ),
-                    // --- TabBar ---
-                    SliverPersistentHeader(
-                      delegate: _StickyTabBarDelegate(
-                        tabBar: const TabBar(
-                          labelColor: Color(0xFF00BCD4),
-                          unselectedLabelColor: Colors.grey,
-                          indicatorColor: Color(0xFF00BCD4),
-                          indicatorWeight: 3,
-                          labelStyle: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          tabs: [
-                            Tab(text: 'ทริปของฉัน'),
-                            Tab(text: 'บล็อกของฉัน'),
-                          ],
-                        ),
-                      ),
-                      pinned: true,
-                    ),
-                  ];
-                },
-                body: TabBarView(
-                  children: [
-                    // ===== Tab 1: My Trips =====
-                    _TripTabContent(trips: _myTrips),
-                    // ===== Tab 2: My Blogs =====
-                    _BlogTabContent(blogs: _myBlogs),
-                  ],
+                  ),
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                  iconTheme: const IconThemeData(color: Colors.black87),
+                  automaticallyImplyLeading: false,
                 ),
+                body: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : NestedScrollView(
+                        headerSliverBuilder: (context, innerScrolling) {
+                          return [
+                            SliverToBoxAdapter(child: _profileHeader()),
+                            // --- Stats Row ---
+                            SliverToBoxAdapter(
+                              child: Container(
+                                color: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _statColumn(
+                                      'ทริป',
+                                      myTrips.length.toString(),
+                                    ),
+                                    const SizedBox(width: 40),
+                                    // จำนวนบล็อกจาก Firebase จริงๆ
+                                    _statColumn(
+                                      'บล็อก',
+                                      myBlogs.length.toString(),
+                                    ),
+                                    const SizedBox(width: 40),
+                                    _statColumn('คะแนน', '67'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // --- TabBar ---
+                            SliverPersistentHeader(
+                              delegate: _StickyTabBarDelegate(
+                                tabBar: const TabBar(
+                                  labelColor: Color(0xFF00BCD4),
+                                  unselectedLabelColor: Colors.grey,
+                                  indicatorColor: Color(0xFF00BCD4),
+                                  indicatorWeight: 3,
+                                  labelStyle: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  tabs: [
+                                    Tab(text: 'ทริปของฉัน'),
+                                    Tab(text: 'บล็อกของฉัน'),
+                                  ],
+                                ),
+                              ),
+                              pinned: true,
+                            ),
+                          ];
+                        },
+                        body: TabBarView(
+                          children: [
+                            // ===== Tab 1: My Trips =====
+                            _TripTabContent(
+                              snapshot: tripSnapshot,
+                              onFavoriteToggle: _toggleFavorite,
+                            ),
+                            // ===== Tab 2: My Blogs (ดึงข้อมูลจาก Firebase) =====
+                            _BlogTabContent(
+                              snapshot: blogSnapshot,
+                              myBlogs: myBlogs,
+                            ),
+                          ],
+                        ),
+                      ),
+                bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
               ),
-        bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
-  // --- Profile info (avatar, name, email, edit button) ---
   Widget _profileHeader() {
     return Container(
       color: Colors.white,
@@ -263,7 +218,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- stat column helper ---
   Widget _statColumn(String label, String value) {
     return Column(
       children: [
@@ -282,14 +236,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// ===== Trip Tab: GridView ของ TripCard =====
+// ===== Trip Tab: ดึงข้อมูลจาก Firebase ผ่าน StreamBuilder =====
 class _TripTabContent extends StatelessWidget {
-  final List<Trip> trips;
+  final AsyncSnapshot<List<TripModel>> snapshot;
+  final void Function(TripModel) onFavoriteToggle;
 
-  const _TripTabContent({required this.trips});
+  const _TripTabContent({
+    required this.snapshot,
+    required this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Loading state
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Error state
+    if (snapshot.hasError) {
+      return Center(
+        child: Text(
+          'เกิดข้อผิดพลาด: ${snapshot.error}',
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    final trips = snapshot.data ?? [];
+
+    // Empty state
     if (trips.isEmpty) {
       return const Center(
         child: Text(
@@ -298,6 +274,7 @@ class _TripTabContent extends StatelessWidget {
         ),
       );
     }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: trips.length,
@@ -306,12 +283,12 @@ class _TripTabContent extends StatelessWidget {
           alignment: Alignment.center,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: TripCard(
+            child: TripCardForProfile(
               trip: trips[index],
               height: 200,
               width: double.infinity,
               onTap: () {},
-              onFavoriteToggle: () {},
+              onFavoriteToggle: () => onFavoriteToggle(trips[index]),
             ),
           ),
         );
@@ -320,15 +297,32 @@ class _TripTabContent extends StatelessWidget {
   }
 }
 
-// ===== Blog Tab: ListView ของ BlogCard =====
+// ===== Blog Tab: ดึงข้อมูลจาก Firebase ผ่าน StreamBuilder =====
 class _BlogTabContent extends StatelessWidget {
-  final List<BlogPost> blogs;
+  final AsyncSnapshot<List<BlogPost>> snapshot;
+  final List<BlogPost> myBlogs; // บล็อกที่กรองเฉพาะของ user แล้ว
 
-  const _BlogTabContent({required this.blogs});
+  const _BlogTabContent({required this.snapshot, required this.myBlogs});
 
   @override
   Widget build(BuildContext context) {
-    if (blogs.isEmpty) {
+    // Loading state
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Error state
+    if (snapshot.hasError) {
+      return Center(
+        child: Text(
+          'เกิดข้อผิดพลาด: ${snapshot.error}',
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    // Empty state
+    if (myBlogs.isEmpty) {
       return const Center(
         child: Text(
           'ยังไม่มีบล็อก',
@@ -336,16 +330,17 @@ class _BlogTabContent extends StatelessWidget {
         ),
       );
     }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: blogs.length,
+      itemCount: myBlogs.length,
       itemBuilder: (context, index) {
         return Align(
           alignment: Alignment.center,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: BlogCard(
-              post: blogs[index],
+              post: myBlogs[index],
               width: double.infinity,
               margin: EdgeInsets.zero,
               onTap: () {},
