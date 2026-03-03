@@ -18,6 +18,7 @@ class DrawerListview extends StatefulWidget {
 class _DrawerListviewState extends State<DrawerListview> {
   String _email = '';
   String _username = 'ผู้ใช้งาน';
+  String _photoUrl = '';
 
   @override
   void initState() {
@@ -47,7 +48,9 @@ class _DrawerListviewState extends State<DrawerListview> {
       if (mounted) {
         setState(() {
           _email = user.email ?? '';
-          _username = doc.data()?['username'] ?? 'ผู้ใช้งาน';
+          _username =
+              doc.data()?['username'] ?? user.displayName ?? 'ผู้ใช้งาน';
+          _photoUrl = doc.data()?['photoUrl'] ?? user.photoURL ?? '';
         });
       }
     }
@@ -82,9 +85,12 @@ class _DrawerListviewState extends State<DrawerListview> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2.5),
                     image: DecorationImage(
-                      image: CachedNetworkImageProvider(
-                        'https://ui-avatars.com/api/?name={$_username}&background=00BCD4&color=fff',
-                      ),
+                      image: _photoUrl.isNotEmpty
+                          ? CachedNetworkImageProvider(_photoUrl)
+                          : CachedNetworkImageProvider(
+                                  'https://ui-avatars.com/api/?name=$_username&background=00BCD4&color=fff',
+                                )
+                                as ImageProvider,
                       fit: BoxFit.cover,
                     ),
                   ),
