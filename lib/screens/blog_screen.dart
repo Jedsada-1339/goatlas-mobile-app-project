@@ -149,12 +149,12 @@ class BlogScreen extends StatelessWidget {
     ColorScheme colorScheme,
     BuildContext context,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
             'บทความยอดนิยม',
             style: TextStyle(
               fontSize: 18,
@@ -162,31 +162,34 @@ class BlogScreen extends StatelessWidget {
               color: colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 12),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 420,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             itemCount: popularPosts.length,
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: BlogCard(
-                  post: popularPosts[index],
-                  width: double.infinity,
-                  margin: EdgeInsets.zero,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          BlogInformationScreen(post: popularPosts[index]),
-                    ),
+              return BlogCard(
+                post: popularPosts[index],
+                width: 300,
+                margin: EdgeInsets.only(
+                  right: index < popularPosts.length - 1 ? 16 : 0,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        BlogInformationScreen(post: popularPosts[index]),
                   ),
                 ),
               );
             },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
