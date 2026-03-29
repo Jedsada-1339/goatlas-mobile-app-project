@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/blog_model.dart';
-import 'cached_image_with_placeholder.dart';
 import 'dart:convert';
 
 class BlogCard extends StatelessWidget {
