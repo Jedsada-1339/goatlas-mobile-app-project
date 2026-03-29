@@ -71,7 +71,10 @@ class _DrawerListviewState extends State<DrawerListview> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [const Color(0xFF1A73E8), const Color(0xFF0D47A1)],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primaryContainer,
+              ],
             ),
           ),
           // Header Content with SafeArea
@@ -86,7 +89,10 @@ class _DrawerListviewState extends State<DrawerListview> {
                   height: 72,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2.5),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      width: 2.5,
+                    ),
                     image: DecorationImage(
                       image: _photoUrl.isNotEmpty
                           ? CachedNetworkImageProvider(_photoUrl)
@@ -103,7 +109,7 @@ class _DrawerListviewState extends State<DrawerListview> {
                 Text(
                   _username,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -112,7 +118,10 @@ class _DrawerListviewState extends State<DrawerListview> {
                 // Email
                 Text(
                   _email,
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 // Stats Row
@@ -252,15 +261,18 @@ class _StatItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white60, fontSize: 11),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+            fontSize: 11,
+          ),
         ),
       ],
     );
@@ -279,10 +291,10 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF90A4AE),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           letterSpacing: 1.2,
         ),
       ),
@@ -318,7 +330,9 @@ class _DrawerItem extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: isLogout ? Colors.red.withOpacity(0.04) : Colors.transparent,
+            color: isLogout
+                ? Theme.of(context).colorScheme.error.withOpacity(0.04)
+                : Colors.transparent,
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
@@ -339,7 +353,9 @@ class _DrawerItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isLogout ? Colors.red : const Color(0xFF37474F),
+                color: isLogout
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             trailing: trailingText != null

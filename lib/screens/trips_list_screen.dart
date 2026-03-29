@@ -20,7 +20,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   String _selectedCategory = 'ทั้งหมด';
 
-  Color get primaryColor => Theme.of(context).primaryColor;
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
 
   void _toggleFavorite(TripModel trip) async {
     try {
@@ -30,7 +30,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -53,7 +53,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -62,8 +62,9 @@ class _TripsListScreenState extends State<TripsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -108,19 +109,19 @@ class _TripsListScreenState extends State<TripsListScreen> {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
+          decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface.withOpacity(0.8)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(width: 40),
               // Title
-              const Text(
+              Text(
                 'ทริปของฉัน',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.5,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               // More Options
@@ -135,9 +136,9 @@ class _TripsListScreenState extends State<TripsListScreen> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
                     onTap: () {},
-                    child: const Icon(
+                    child: Icon(
                       Icons.more_horiz,
-                      color: Color(0xFF64748B),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -153,7 +154,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
 
   Widget _buildCategoryChips() {
     return Container(
-      color: Colors.white.withOpacity(0.5),
+      color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
       height: 60,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -177,11 +178,11 @@ class _TripsListScreenState extends State<TripsListScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? primaryColor : const Color(0xFFF1F5F9),
+                  color: isSelected ? primaryColor : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(20),
                   border: isSelected
                       ? null
-                      : Border.all(color: const Color(0xFFE2E8F0)),
+                      : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 child: Center(
                   child: Text(
@@ -190,8 +191,8 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF64748B),
+                          ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.9)
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -223,12 +224,12 @@ class _TripsListScreenState extends State<TripsListScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
+            Text(
               'ยังไม่มีทริป',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 12),
@@ -237,7 +238,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -261,18 +262,18 @@ class _TripsListScreenState extends State<TripsListScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'ทริปทั้งหมด',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 0.5,
                 ),
               ),
               Text(
                 '${trips.length} ทริป',
-                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -349,13 +350,13 @@ class _TripsListScreenState extends State<TripsListScreen> {
             value: '${trips.length}',
             label: 'ทริปทั้งหมด',
           ),
-          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
+          Container(width: 1, height: 40, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
           _buildStatItem(
             icon: Icons.location_on_outlined,
             value: '$totalPlaces',
             label: 'สถานที่',
           ),
-          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
+          Container(width: 1, height: 40, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
           _buildStatItem(
             icon: Icons.calendar_today_outlined,
             value: '$totalDays',
@@ -373,20 +374,23 @@ class _TripsListScreenState extends State<TripsListScreen> {
   }) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+          ),
         ),
       ],
     );
@@ -397,17 +401,17 @@ class _TripsListScreenState extends State<TripsListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text(
+        title: Text(
           'ลบทริป',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         content: Text(
           'ต้องการลบทริป "${trip.name}" หรือไม่?\nการดำเนินการนี้ไม่สามารถย้อนกลับได้',
-          style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+          style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -415,7 +419,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
             child: Text(
               'ยกเลิก',
               style: TextStyle(
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -426,8 +430,8 @@ class _TripsListScreenState extends State<TripsListScreen> {
               _deleteTrip(trip);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -461,7 +465,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),

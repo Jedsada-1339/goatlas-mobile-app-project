@@ -19,7 +19,7 @@ class BlogCard extends StatelessWidget {
     this.margin,
   });
 
-  Widget _buildCoverImage(String imageData, double width) {
+  Widget _buildCoverImage(BuildContext context, String imageData, double width) {
     if (imageData.startsWith('data:image')) {
       try {
         final base64String = imageData.split(',').last;
@@ -28,10 +28,10 @@ class BlogCard extends StatelessWidget {
           width: width,
           height: 180,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _imagePlaceholder(width),
+          errorBuilder: (_, __, ___) => _imagePlaceholder(context, width),
         );
       } catch (_) {
-        return _imagePlaceholder(width);
+        return _imagePlaceholder(context, width);
       }
     } else {
       return CachedNetworkImage(
@@ -39,30 +39,37 @@ class BlogCard extends StatelessWidget {
         width: width,
         height: 180,
         fit: BoxFit.cover,
-        placeholder: (_, __) => _imagePlaceholder(width),
-        errorWidget: (_, __, ___) => _imagePlaceholder(width),
+        placeholder: (_, __) => _imagePlaceholder(context, width),
+        errorWidget: (_, __, ___) => _imagePlaceholder(context, width),
       );
     }
   }
 
-  Widget _imagePlaceholder(double width) {
+  Widget _imagePlaceholder(BuildContext context, double width) {
     return Container(
       width: width,
       height: 180,
-      color: Colors.grey[200],
-      child: Icon(Icons.image_outlined, color: Colors.grey[400], size: 48),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.image_outlined,
+        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+        size: 48,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: width,
         margin: margin ?? const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -81,7 +88,7 @@ class BlogCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
-                child: _buildCoverImage(post.coverImage, width),
+                child: _buildCoverImage(context, post.coverImage, width),
               ),
 
             // Content
@@ -102,13 +109,13 @@ class BlogCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00BCD4).withOpacity(0.1),
+                            color: colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             tag,
-                            style: const TextStyle(
-                              color: Color(0xFF00BCD4),
+                            style: TextStyle(
+                              color: colorScheme.primary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -122,10 +129,10 @@ class BlogCard extends StatelessWidget {
                   // Title
                   Text(
                     post.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                       height: 1.3,
                     ),
                     maxLines: 2,
@@ -139,7 +146,7 @@ class BlogCard extends StatelessWidget {
                     post.contentPreview,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurfaceVariant,
                       height: 1.5,
                     ),
                     maxLines: 3,
@@ -157,12 +164,13 @@ class BlogCard extends StatelessWidget {
                         backgroundImage: post.authorAvatar.isNotEmpty
                             ? CachedNetworkImageProvider(post.authorAvatar)
                             : null,
-                        backgroundColor: const Color(0xFF00BCD4),
+                        backgroundColor: colorScheme.primary,
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
+                                style: TextStyle(color: colorScheme.onPrimary),
                               )
                             : null,
                       ),
@@ -176,10 +184,10 @@ class BlogCard extends StatelessWidget {
                           children: [
                             Text(
                               post.authorName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: colorScheme.onSurface,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -191,14 +199,14 @@ class BlogCard extends StatelessWidget {
                                   post.timeAgo,
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey[500],
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 Text(
                                   ' • ${post.readTime} นาทีในการอ่าน',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey[500],
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -217,14 +225,14 @@ class BlogCard extends StatelessWidget {
                               Icon(
                                 Icons.favorite_border,
                                 size: 14,
-                                color: Colors.grey[400],
+                                color: colorScheme.outline,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${post.likes}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -236,14 +244,14 @@ class BlogCard extends StatelessWidget {
                               Icon(
                                 Icons.chat_bubble_outline,
                                 size: 14,
-                                color: Colors.grey[400],
+                                color: colorScheme.outline,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${post.comments}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
