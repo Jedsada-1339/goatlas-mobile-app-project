@@ -211,4 +211,58 @@ class FirebaseService {
   Future<void> toggleTripFavorite(String tripId, bool isFavorite) async {
     await _tripsCollection.doc(tripId).update({'isFavorite': isFavorite});
   }
+
+  // เพิ่มใน class FirebaseService
+  // --- Points Management ---
+
+  /// ดึงคะแนนปัจจุบันของ User
+  Future<int> getUserPoints() async {
+    final uid = currentUser?.uid;
+    if (uid == null) return 0;
+
+    final doc = await _firestore.collection('users').doc(uid).get();
+    if (doc.exists && doc.data() != null) {
+      // ถ้ายังไม่มีฟิลด์ points ให้คืนค่า 0
+      return (doc.data()!['points'] ?? 0) as int;
+    }
+    return 0;
+  }
+
+  /// อัปเดตคะแนน (เช่น ใช้แลกของ หรือได้รับเพิ่ม)
+  Future<void> updatePoints(int amount) async {
+    final uid = currentUser?.uid;
+    if (uid == null) return;
+
+    await _firestore.collection('users').doc(uid).update({
+      'points': FieldValue.increment(amount), // ใช้ increment เพื่อบวกหรือลบค่า
+    });
+  }
+
+  /// อัปเดต Username ใน Firestore
+  Future<void> updateUsername(String newUsername) async {
+    final uid = currentUser?.uid;
+    if (uid == null) throw Exception('User not logged in');
+
+    await _firestore.collection('users').doc(uid).update({
+      'username': newUsername,
+    });
+  }
+
+  /// อัปเดต Password ใน Firebase Auth
+  Future<void> updateUserPassword(String newPassword) async {
+    final user = currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    try {
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      // กรณีไม่ได้ login นานเกินไป Firebase จะบังคับให้ Re-authenticate
+      if (e.code == 'requires-recent-login') {
+        throw Exception(
+          'เพื่อความปลอดภัย กรุณาเข้าสู่ระบบใหม่อีกครั้งก่อนเปลี่ยนรหัสผ่าน',
+        );
+      }
+      rethrow;
+    }
+  }
 }
