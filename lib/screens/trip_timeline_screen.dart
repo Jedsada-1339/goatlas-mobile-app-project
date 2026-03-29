@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'create_trip_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'check_in_screen.dart';
 
 class TripTimelineScreen extends StatefulWidget {
   final TripModel trip;
@@ -857,7 +858,38 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                               ),
                             ),
                           ),
-                          if (place.latitude != null && place.longitude != null)
+                          if (place.latitude != null && place.longitude != null) ...[
+                            GestureDetector(
+                              onTap: place.isVisited
+                                  ? null
+                                  : () async {
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CheckInScreen(place: place),
+                                        ),
+                                      );
+                                      // หากเช็คอินสำเร็จและยังไม่ได้ติ๊ก visited ก็จะปรับสถานะให้
+                                      if (result == true && !place.isVisited) {
+                                        _toggleVisited(dayIndex, placeIndex);
+                                      }
+                                    },
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: place.isVisited
+                                      ? Colors.grey.withOpacity(0.1)
+                                      : Colors.green.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.camera_enhance,
+                                  size: 16,
+                                  color: place.isVisited ? Colors.grey : Colors.green,
+                                ),
+                              ),
+                            ),
                             GestureDetector(
                               onTap: () {
                                 // Find previous place
@@ -899,6 +931,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                                 ),
                               ),
                             ),
+                          ],
                           _buildTypeBadge(place.placeType),
                         ],
                       ),
