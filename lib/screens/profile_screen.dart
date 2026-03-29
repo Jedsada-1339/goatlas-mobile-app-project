@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _email = '';
   String? _photoUrl;
   bool _isLoading = true;
+  int _point = 0; // ตัวแปรเก็บคะแนนของผู้ใช้
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _username = userData['username'] ?? 'ผู้ใช้งาน';
           _email = userData['email'] ?? user.email ?? '';
           _photoUrl = userData['photoUrl'];
+          _point = userData['points'] ?? 0; // ดึงคะแนนจาก Firestore
           _isLoading = false;
         });
       } else {
@@ -123,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       myBlogs.length.toString(),
                                     ),
                                     const SizedBox(width: 40),
-                                    _statColumn('คะแนน', '67'),
+                                    _statColumn('คะแนน', '$_point'),
                                   ],
                                 ),
                               ),

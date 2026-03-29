@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../screens/profile_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/faq_support_screen.dart';
+import '../screens/rewards_screen.dart';
 import '../utills/firebase_service.dart';
 
 import 'package:firebase_auth/firebase_auth.dart'; // เพิ่ม import สำหรับ FirebaseAuth
@@ -19,6 +20,7 @@ class _DrawerListviewState extends State<DrawerListview> {
   String _email = '';
   String _username = 'ผู้ใช้งาน';
   String _photoUrl = '';
+  int _userPoints = 0; // เพิ่มตัวแปรเก็บคะแนน
 
   @override
   void initState() {
@@ -51,6 +53,7 @@ class _DrawerListviewState extends State<DrawerListview> {
           _username =
               doc.data()?['username'] ?? user.displayName ?? 'ผู้ใช้งาน';
           _photoUrl = doc.data()?['photoUrl'] ?? user.photoURL ?? '';
+          _userPoints = doc.data()?['points'] ?? 0; // ดึงคะแนนจาก Firestore
         });
       }
     }
@@ -114,12 +117,12 @@ class _DrawerListviewState extends State<DrawerListview> {
                 const SizedBox(height: 16),
                 // Stats Row
                 Row(
-                  children: const [
+                  children: [
                     _StatItem(label: 'ทริป', value: '12'),
                     SizedBox(width: 24),
                     _StatItem(label: 'บุ๊กมาร์ก', value: '8'),
                     SizedBox(width: 24),
-                    _StatItem(label: 'คะแนน', value: '67'),
+                    _StatItem(label: 'คะแนน', value: '$_userPoints'),
                   ],
                 ),
               ],
@@ -140,9 +143,19 @@ class _DrawerListviewState extends State<DrawerListview> {
               _DrawerItem(
                 icon: Icons.star_rounded,
                 label: 'คะแนน & รางวัล',
-                trailingText: '67 pts',
+                trailingText: '$_userPoints pts',
                 color: const Color(0xFFFFB300),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.pop(context); // ปิด Drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RewardsScreen(),
+                    ),
+                  ).then(
+                    (_) => _loadUserData(),
+                  ); // เมื่อกลับมาหน้าเดิม ให้โหลดคะแนนใหม่
+                },
               ),
               _DrawerItem(
                 icon: Icons.bookmark_rounded,
