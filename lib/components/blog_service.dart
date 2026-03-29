@@ -47,42 +47,18 @@ class BlogService {
     return _blogsCollection
         .orderBy('publishedDate', descending: true)
         .snapshots()
-        .asyncMap((snapshot) async {
-          // ดึงข้อมูลโปรไฟล์ user
-          String userName = '';
-          String userAvatar = '';
-          final uid = _currentUserId;
-          if (uid != null) {
-            final userDoc = await _firestore.collection('users').doc(uid).get();
-            if (userDoc.exists) {
-              final userData = userDoc.data();
-              userName = userData?['username'] ?? '';
-              userAvatar = userData?['photoUrl'] ?? '';
-            }
-          }
-          // fallback จาก FirebaseAuth
-          final authUser = _auth.currentUser;
-          if (userName.isEmpty) {
-            userName = authUser?.displayName ?? 'ผู้ใช้';
-          }
-          if (userAvatar.isEmpty) {
-            userAvatar = authUser?.photoURL ?? '';
-          }
-
+        .map((snapshot) {
           return snapshot.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             final post = BlogPost.fromJson(data);
-            // ใส่ชื่อ/รูปผู้เขียนถ้าข้อมูลว่าง
+            
+            // ส่งคืนข้อมูลตามที่ถูกบันทึกมา ป้องกันการนำรูป/ชื่อของ user ปัจจุบันไปใส่แทน
             return BlogPost(
               id: post.id,
               title: post.title,
               content: post.content,
-              authorName: post.authorName.isNotEmpty
-                  ? post.authorName
-                  : userName,
-              authorAvatar: post.authorAvatar.isNotEmpty
-                  ? post.authorAvatar
-                  : userAvatar,
+              authorName: post.authorName,
+              authorAvatar: post.authorAvatar,
               coverImage: post.coverImage,
               publishedDate: post.publishedDate,
               readTime: post.readTime,
@@ -90,7 +66,7 @@ class BlogService {
               comments: post.comments,
               tags: post.tags,
               images: post.images,
-              authorId: '',
+              authorId: post.authorId,
             );
           }).toList();
         });
