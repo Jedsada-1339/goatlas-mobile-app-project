@@ -139,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
       likes: 245,
       comments: 32,
       tags: ['เที่ยวเหนือ', 'ธรรมชาติ'],
+      authorId: '',
     ),
     BlogPost(
       id: '2',
@@ -154,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
       likes: 189,
       comments: 28,
       tags: ['ทะเล', 'ประหยัด'],
+      authorId: '',
     ),
     BlogPost(
       id: '3',
@@ -170,6 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
       likes: 312,
       comments: 45,
       tags: ['กรุงเทพฯ', 'อาหาร'],
+      authorId: '',
     ),
   ];
   // กรองสถานที่ท่องเที่ยวตามหมวดหมู่ที่เลือก

@@ -6,6 +6,7 @@ class BlogPost {
   final String content;
   final String authorName;
   final String authorAvatar;
+  final String authorId;
   final String coverImage;
   final DateTime publishedDate;
   final int readTime;
@@ -20,6 +21,7 @@ class BlogPost {
     required this.content,
     required this.authorName,
     required this.authorAvatar,
+    required this.authorId,
     required this.coverImage,
     required this.publishedDate,
     this.readTime = 5,
@@ -37,6 +39,7 @@ class BlogPost {
       content: json['content'] ?? '',
       authorName: json['authorName'] ?? '',
       authorAvatar: json['authorAvatar'] ?? '',
+      authorId: json['authorId'] ?? '',
       coverImage: json['coverImage'] ?? '',
       publishedDate: json['publishedDate'] is Timestamp
           ? (json['publishedDate'] as Timestamp).toDate()
@@ -66,6 +69,7 @@ class BlogPost {
       'content': content,
       'authorName': authorName,
       'authorAvatar': authorAvatar,
+      'authorId': authorId,
       'coverImage': coverImage,
       'publishedDate': Timestamp.fromDate(publishedDate),
       'readTime': readTime,

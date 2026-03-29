@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/blog_model.dart';
 import '../components/blog_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 
 class CreateBlogScreen extends StatefulWidget {
@@ -92,17 +93,23 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       final readTime = (wordCount / 200).ceil().clamp(1, 60);
 
       // สร้าง BlogPost
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('ไม่พบข้อมูลผู้ใช้ กรุณาล็อกอินใหม่');
+      }
+
       final newPost = BlogPost(
-        id: '', // Firestore จะสร้าง ID ให้
+        id: '',
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         authorName: widget.authorName,
         authorAvatar: widget.authorAvatar,
-        coverImage: _coverImageBase64!, // เก็บ Base64 string
+        authorId: user.uid, // ✅ เพิ่มบรรทัดนี้!
+        coverImage: _coverImageBase64!,
         publishedDate: DateTime.now(),
         readTime: readTime,
         tags: _tags,
-        images: [_coverImageBase64!], // เพิ่ม Base64 ใน images ด้วย
+        images: [_coverImageBase64!],
       );
 
       // บันทึกลง Firestore
