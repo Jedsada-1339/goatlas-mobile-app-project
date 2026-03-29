@@ -64,6 +64,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // เพิ่มฟังก์ชันนี้ใน class _ProfileScreenState
+
+  void _showEditProfileDialog() {
+    final TextEditingController _usernameController = TextEditingController(
+      text: _username,
+    );
+    final TextEditingController _passwordController = TextEditingController();
+    bool _isUpdating = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // เพื่อให้คีย์บอร์ดไม่บัง
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20,
+            right: 20,
+            top: 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'แก้ไขโปรไฟล์',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              // แก้ไข Username
+              TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'Username ใหม่',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // แก้ไข Password
+              // Todo: สร้าง Logic สำหรับการอัปเดต Password ใน Firebase Auth และเชื่อมต่อกับฟังก์ชันนี้
+              // TextField(
+              //   controller: _passwordController,
+              //   obscureText: true,
+              //   decoration: const InputDecoration(
+              //     labelText: 'รหัสผ่านใหม่ (ปล่อยว่างถ้าไม่ต้องการเปลี่ยน)',
+              //     border: OutlineInputBorder(),
+              //     prefixIcon: Icon(Icons.lock),
+              //   ),
+              // ),
+              // const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isUpdating
+                      ? null
+                      : () async {
+                          setModalState(() => _isUpdating = true);
+                          try {
+                            // 1. อัปเดต Username ถ้ามีการเปลี่ยนแปลง
+                            if (_usernameController.text.trim() != _username) {
+                              await _firebaseService.updateUsername(
+                                _usernameController.text.trim(),
+                              );
+                            }
+
+                            // 2. อัปเดต Password ถ้ามีการกรอกข้อมูล
+                            if (_passwordController.text.isNotEmpty) {
+                              if (_passwordController.text.length < 6) {
+                                throw Exception(
+                                  'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+                                );
+                              }
+                              await _firebaseService.updateUserPassword(
+                                _passwordController.text,
+                              );
+                            }
+
+                            if (mounted) {
+                              Navigator.pop(context);
+                              _loadUserData(); // โหลดข้อมูลหน้าจอใหม่
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('อัปเดตข้อมูลสำเร็จ'),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } finally {
+                            setModalState(() => _isUpdating = false);
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00BCD4), // สีพื้นหลังปุ่ม
+                    foregroundColor: Colors.white, // สีตัวอักษรบนปุ่ม
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isUpdating
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('บันทึกการเปลี่ยนแปลง'),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<TripModel>>(
@@ -203,7 +327,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(_email, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: _showEditProfileDialog,
             icon: const Icon(Icons.edit_outlined, size: 18),
             label: const Text('แก้ไขโปรไฟล์'),
             style: OutlinedButton.styleFrom(

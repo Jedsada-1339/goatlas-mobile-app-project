@@ -237,4 +237,32 @@ class FirebaseService {
       'points': FieldValue.increment(amount), // ใช้ increment เพื่อบวกหรือลบค่า
     });
   }
+
+  /// อัปเดต Username ใน Firestore
+  Future<void> updateUsername(String newUsername) async {
+    final uid = currentUser?.uid;
+    if (uid == null) throw Exception('User not logged in');
+
+    await _firestore.collection('users').doc(uid).update({
+      'username': newUsername,
+    });
+  }
+
+  /// อัปเดต Password ใน Firebase Auth
+  Future<void> updateUserPassword(String newPassword) async {
+    final user = currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    try {
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      // กรณีไม่ได้ login นานเกินไป Firebase จะบังคับให้ Re-authenticate
+      if (e.code == 'requires-recent-login') {
+        throw Exception(
+          'เพื่อความปลอดภัย กรุณาเข้าสู่ระบบใหม่อีกครั้งก่อนเปลี่ยนรหัสผ่าน',
+        );
+      }
+      rethrow;
+    }
+  }
 }
