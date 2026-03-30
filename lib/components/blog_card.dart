@@ -56,6 +56,7 @@ class BlogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -107,11 +108,8 @@ class BlogCard extends StatelessWidget {
                           ),
                           child: Text(
                             tag,
-                            style: const TextStyle(
-                              color: Color(0xFF00BCD4),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(color: const Color(0xFF00BCD4)),
                           ),
                         );
                       }).toList(),
@@ -122,11 +120,9 @@ class BlogCard extends StatelessWidget {
                   // Title
                   Text(
                     post.title,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      height: 1.3,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -137,10 +133,8 @@ class BlogCard extends StatelessWidget {
                   // Content Preview
                   Text(
                     post.contentPreview,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      height: 1.5,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
@@ -176,11 +170,8 @@ class BlogCard extends StatelessWidget {
                           children: [
                             Text(
                               post.authorName,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: colorScheme.onSurface),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -189,17 +180,17 @@ class BlogCard extends StatelessWidget {
                               children: [
                                 Text(
                                   post.timeAgo,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey[500],
-                                  ),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                                 Text(
                                   ' • ${post.readTime} นาทีในการอ่าน',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey[500],
-                                  ),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                               ],
                             ),
@@ -217,14 +208,18 @@ class BlogCard extends StatelessWidget {
                               Icon(
                                 Icons.favorite_border,
                                 size: 14,
-                                color: Colors.grey[400],
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${post.likes}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -236,14 +231,18 @@ class BlogCard extends StatelessWidget {
                               Icon(
                                 Icons.chat_bubble_outline,
                                 size: 14,
-                                color: Colors.grey[400],
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${post.comments}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
