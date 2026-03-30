@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/blog_model.dart';
 import '../components/blog_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 
 class CreateBlogScreen extends StatefulWidget {
@@ -92,17 +93,23 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       final readTime = (wordCount / 200).ceil().clamp(1, 60);
 
       // สร้าง BlogPost
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('ไม่พบข้อมูลผู้ใช้ กรุณาล็อกอินใหม่');
+      }
+
       final newPost = BlogPost(
-        id: '', // Firestore จะสร้าง ID ให้
+        id: '',
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         authorName: widget.authorName,
         authorAvatar: widget.authorAvatar,
-        coverImage: _coverImageBase64!, // เก็บ Base64 string
+        authorId: user.uid, // ✅ เพิ่มบรรทัดนี้!
+        coverImage: _coverImageBase64!,
         publishedDate: DateTime.now(),
         readTime: readTime,
         tags: _tags,
-        images: [_coverImageBase64!], // เพิ่ม Base64 ใน images ด้วย
+        images: [_coverImageBase64!],
       );
 
       // บันทึกลง Firestore
@@ -136,22 +143,22 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios,
-            color: Colors.black87,
+            color: colorScheme.onSurface,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'เขียนบทความ',
           style: TextStyle(
-            color: Colors.black87,
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -195,19 +202,19 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
               const SizedBox(height: 24),
 
               // ─── หัวข้อ ───
-              const Text(
+              Text(
                 'หัวข้อบทความ *',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _titleController,
                 maxLength: 100,
-                decoration: _inputDecoration('ใส่หัวข้อบทความ...'),
+                decoration: _inputDecoration('ใส่หัวข้อบทความ...', colorScheme),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'กรุณาใส่หัวข้อ' : null,
               ),
@@ -215,19 +222,19 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
               const SizedBox(height: 20),
 
               // ─── เนื้อหา ───
-              const Text(
+              Text(
                 'เนื้อหา *',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _contentController,
                 maxLines: 5,
-                decoration: _inputDecoration('เขียนเนื้อหาบทความที่นี่...'),
+                decoration: _inputDecoration('เขียนเนื้อหาบทความที่นี่...', colorScheme),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'กรุณาใส่เนื้อหา' : null,
               ),
@@ -235,12 +242,12 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
               const SizedBox(height: 20),
 
               // ─── Tags ───
-              const Text(
+              Text(
                 'แท็ก (สูงสุด 5 แท็ก)',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -249,7 +256,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _tagController,
-                      decoration: _inputDecoration('เช่น เที่ยว, อาหาร...'),
+                      decoration: _inputDecoration('เช่น เที่ยว, อาหาร...', colorScheme),
                       onFieldSubmitted: _addTag,
                     ),
                   ),
@@ -275,13 +282,15 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   children: _tags.map((tag) {
                     return Chip(
                       label: Text(tag),
-                      deleteIcon: const Icon(Icons.close, size: 16),
+                      deleteIcon: Icon(Icons.close, size: 16, color: colorScheme.primary),
                       onDeleted: () => setState(() => _tags.remove(tag)),
-                      backgroundColor: const Color(0xFF00BCD4).withOpacity(0.1),
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF00BCD4),
+                      backgroundColor: colorScheme.primary.withOpacity(0.1),
+                      labelStyle: TextStyle(
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
+                      side: BorderSide.none,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     );
                   }).toList(),
                 ),
@@ -304,9 +313,9 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
         height: 200,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[300]!),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           image: _coverImageFile != null
               ? DecorationImage(
                   image: FileImage(_coverImageFile!),
@@ -321,21 +330,21 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   Icon(
                     Icons.add_photo_alternate_outlined,
                     size: 48,
-                    color: Colors.grey[400],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'เลือกรูปปกบทความ',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'แตะเพื่อเลือกรูปจากอัลบั้ม',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7)),
                   ),
                 ],
               )
@@ -362,23 +371,23 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  InputDecoration _inputDecoration(String hint, ColorScheme colorScheme) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[400]),
+      hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
       filled: true,
-      fillColor: Colors.grey[50],
+      fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(color: colorScheme.outlineVariant),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(color: colorScheme.outlineVariant),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF00BCD4), width: 2),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );

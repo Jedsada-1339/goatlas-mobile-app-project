@@ -207,7 +207,6 @@ class _FaqSupportPageState extends State<FaqSupportPage>
           labelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: Colors.grey,
           ),
           tabs: const [
             Tab(text: 'คำถามที่พบบ่อย'),
@@ -243,7 +242,7 @@ class _FaqSupportPageState extends State<FaqSupportPage>
               hintText: 'ค้นหาคำถาม...',
               prefixIcon: Icon(Icons.search, color: colorScheme.primary),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -704,7 +703,7 @@ class _FaqSupportPageState extends State<FaqSupportPage>
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: option.color,
+                    backgroundColor: option.color.withOpacity(0.8),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

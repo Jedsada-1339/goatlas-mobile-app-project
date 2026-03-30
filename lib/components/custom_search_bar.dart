@@ -19,7 +19,7 @@ class CustomSearchBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -38,7 +38,10 @@ class CustomSearchBar extends StatelessWidget {
               style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 14,
+                ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -46,7 +49,11 @@ class CustomSearchBar extends StatelessWidget {
           ),
           IconButton(
             onPressed: onSearchPressed,
-            icon: Icon(Icons.search, color: Colors.grey[600], size: 24),
+            icon: Icon(
+              Icons.search,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
           ),
         ],
       ),

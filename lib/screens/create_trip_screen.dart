@@ -70,12 +70,12 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'เลือกรูปปก',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -153,7 +153,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                       color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.delete_outline, color: Colors.red),
+                    child: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   ),
                   title: const Text('ลบรูปปก'),
                   onTap: () {
@@ -224,8 +224,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             colorScheme: ColorScheme.light(
               primary: primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: const Color(0xFF0F172A),
+              surface: Theme.of(context).colorScheme.surface,
+              onSurface: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           child: child!,
@@ -287,7 +287,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('กรุณาใส่ชื่อทริป'),
-          backgroundColor: Color(0xFFEF4444),
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -320,8 +320,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -363,7 +364,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface.withOpacity(0.8)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -377,18 +378,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.chevron_left, color: Color(0xFF64748B)),
+                child: Icon(Icons.chevron_left, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ),
           ),
           // Title
           Text(
             _isEditing ? 'แก้ไขทริป' : 'สร้างทริปใหม่',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.5,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           // Placeholder for symmetry
@@ -412,7 +413,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           height: 180,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: const Color(0xFFE2E8F0),
+            color: Theme.of(context).colorScheme.surfaceVariant,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -468,7 +469,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -507,7 +508,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       width: double.infinity,
       height: 180,
       decoration: BoxDecoration(
-        color: const Color(0xFFE2E8F0),
+        color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -516,14 +517,14 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           Icon(
             Icons.add_photo_alternate_outlined,
             size: 48,
-            color: Colors.grey[400],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 8),
           Text(
             'แตะเพื่อเพิ่มรูปปก',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -538,29 +539,29 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 4, bottom: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
               'ชื่อทริป',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF94A3B8),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,
               ),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
               borderRadius: BorderRadius.circular(16),
             ),
             child: TextField(
               controller: _tripNameController,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF0F172A)),
+              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'เช่น เชียงใหม่ 3 วัน 2 คืน',
-                hintStyle: TextStyle(fontSize: 16, color: Colors.grey[400]),
+                hintStyle: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -576,7 +577,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.transparent),
               ),
@@ -585,8 +586,8 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                   Icon(
                     Icons.calendar_today_outlined,
                     color: _currentTrip.startDate != null
-                        ? primaryColor
-                        : const Color(0xFF94A3B8),
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -595,17 +596,17 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       color: _currentTrip.startDate != null
-                          ? const Color(0xFF0F172A)
-                          : const Color(0xFF94A3B8),
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: _currentTrip.startDate != null
                           ? FontWeight.w500
                           : FontWeight.normal,
                     ),
                   ),
                   const Spacer(),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right,
-                    color: Color(0xFF94A3B8),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                 ],
@@ -648,15 +649,15 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         height: 96,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor : const Color(0xFFF1F5F9),
+          color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           borderRadius: BorderRadius.circular(24),
           border: isSelected
               ? null
-              : Border.all(color: const Color(0xFFE2E8F0), width: 1),
+              : Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 1),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: primaryColor.withOpacity(0.25),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -683,7 +684,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                       fontWeight: FontWeight.w500,
                       color: isSelected
                           ? Colors.white.withOpacity(0.8)
-                          : const Color(0xFF94A3B8),
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       letterSpacing: 1, // Reduced spacing
                     ),
                   ),
@@ -695,7 +696,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                       fontWeight: FontWeight.bold,
                       color: isSelected
                           ? Colors.white
-                          : const Color(0xFF94A3B8),
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   if (placeCount > 0)
@@ -706,7 +707,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                         fontWeight: FontWeight.w500,
                         color: isSelected
                             ? Colors.white.withOpacity(0.7)
-                            : const Color(0xFF94A3B8),
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                 ],
@@ -732,10 +733,10 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             children: [
               Text(
                 'กำหนดการวันที่ $_selectedDay',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Text(
