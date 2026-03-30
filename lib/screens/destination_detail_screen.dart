@@ -9,15 +9,16 @@ class DestinationDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
               onPressed: () => Navigator.pop(context),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -57,10 +58,10 @@ class DestinationDetailScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           destination.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -83,9 +84,9 @@ class DestinationDetailScreen extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               destination.rating.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -96,25 +97,25 @@ class DestinationDetailScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on,
-                        color: Colors.grey,
+                        color: colorScheme.onSurfaceVariant,
                         size: 16,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         destination.location,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'รายละเอียด',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -122,9 +123,9 @@ class DestinationDetailScreen extends StatelessWidget {
                     destination.description.isNotEmpty
                         ? destination.description
                         : 'ไม่มีรายละเอียดเพิ่มเติม',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Color(0xFF64748B),
+                      color: colorScheme.onSurfaceVariant,
                       height: 1.6,
                     ),
                   ),

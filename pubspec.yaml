@@ -50,6 +50,8 @@ dependencies:
   google_sign_in: ^6.2.1
   flutter_image_compress: ^2.1.0
   flutter_markdown: ^0.6.18
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

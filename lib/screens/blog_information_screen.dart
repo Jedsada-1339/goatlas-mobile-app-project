@@ -34,10 +34,10 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
           width: double.infinity,
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              color: Colors.grey[300],
+              color: Theme.of(context).colorScheme.surfaceVariant,
               child: Icon(
                 Icons.broken_image,
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 50,
               ),
             );
@@ -45,15 +45,15 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
         );
       } catch (e) {
         return Container(
-          color: Colors.grey[300],
+          color: Theme.of(context).colorScheme.surfaceVariant,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.grey[500], size: 50),
+              Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 50),
               const SizedBox(height: 8),
               Text(
                 'ไม่สามารถโหลดรูปภาพได้',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -66,12 +66,12 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
         fit: BoxFit.cover,
         width: double.infinity,
         placeholder: (context, url) => Container(
-          color: Colors.grey[200],
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) => Container(
-          color: Colors.grey[300],
-          child: Icon(Icons.broken_image, color: Colors.grey[500], size: 50),
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          child: Icon(Icons.broken_image, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 50),
         ),
       );
     }
@@ -92,34 +92,35 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           // AppBar with Back Button
           SliverAppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: colorScheme.surface,
             elevation: 0,
             pinned: true,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
                 size: 20,
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
+            title: Text(
               'รายละเอียดบทความ',
               style: TextStyle(
-                color: Colors.black87,
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.share_outlined, color: Colors.black87),
+                icon: Icon(Icons.share_outlined, color: colorScheme.onSurface),
                 onPressed: () {
                   ScaffoldMessenger.of(
                     context,

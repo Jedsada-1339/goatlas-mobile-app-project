@@ -73,12 +73,14 @@ class TripCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       trip.isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: trip.isFavorite ? Colors.red : Colors.grey[600],
+                      color: trip.isFavorite
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       size: 20,
                     ),
                   ),

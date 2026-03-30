@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -161,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(e.toString()),
-                                backgroundColor: Colors.red,
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
                             );
                           } finally {
@@ -169,14 +169,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00BCD4), // สีพื้นหลังปุ่ม
-                    foregroundColor: Colors.white, // สีตัวอักษรบนปุ่ม
+                    backgroundColor: Theme.of(context).colorScheme.primary, // สีพื้นหลังปุ่ม
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary, // สีตัวอักษรบนปุ่ม
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _isUpdating
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary)
                       : const Text('บันทึกการเปลี่ยนแปลง'),
                 ),
               ),
@@ -207,19 +207,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return DefaultTabController(
               length: 2,
               child: Scaffold(
-                backgroundColor: const Color(0xFFF5F5F5),
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 appBar: AppBar(
                   centerTitle: true,
-                  title: const Text(
+                  title: Text(
                     'โปรไฟล์',
                     style: TextStyle(
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                   elevation: 0,
-                  iconTheme: const IconThemeData(color: Colors.black87),
+                  iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
                   automaticallyImplyLeading: false,
                 ),
                 body: _isLoading
@@ -231,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // --- Stats Row ---
                             SliverToBoxAdapter(
                               child: Container(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                 ),
@@ -257,10 +257,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // --- TabBar ---
                             SliverPersistentHeader(
                               delegate: _StickyTabBarDelegate(
-                                tabBar: const TabBar(
-                                  labelColor: Color(0xFF00BCD4),
-                                  unselectedLabelColor: Colors.grey,
-                                  indicatorColor: Color(0xFF00BCD4),
+                                tabBar: TabBar(
+                                  labelColor: Theme.of(context).colorScheme.primary,
+                                  unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  indicatorColor: Theme.of(context).colorScheme.primary,
                                   indicatorWeight: 3,
                                   labelStyle: TextStyle(
                                     fontSize: 14,
@@ -302,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _profileHeader() {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
       child: Column(
         children: [
@@ -317,22 +317,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 14),
           Text(
             _username,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
-          Text(_email, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+          Text(_email, style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: _showEditProfileDialog,
             icon: const Icon(Icons.edit_outlined, size: 18),
             label: const Text('แก้ไขโปรไฟล์'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF00BCD4),
-              side: const BorderSide(color: Color(0xFF00BCD4)),
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              side: BorderSide(color: Theme.of(context).colorScheme.primary),
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -349,14 +349,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 2),
-        Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+        Text(label, style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }
@@ -384,19 +384,21 @@ class _TripTabContent extends StatelessWidget {
       return Center(
         child: Text(
           'เกิดข้อผิดพลาด: ${snapshot.error}',
-          style: const TextStyle(color: Colors.red),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       );
     }
 
     final trips = snapshot.data ?? [];
 
-    // Empty state
     if (trips.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'ยังไม่มีทริป',
-          style: TextStyle(color: Colors.grey, fontSize: 16),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 16,
+          ),
         ),
       );
     }
@@ -442,17 +444,19 @@ class _BlogTabContent extends StatelessWidget {
       return Center(
         child: Text(
           'เกิดข้อผิดพลาด: ${snapshot.error}',
-          style: const TextStyle(color: Colors.red),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       );
     }
 
-    // Empty state
     if (myBlogs.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'ยังไม่มีบล็อก',
-          style: TextStyle(color: Colors.grey, fontSize: 16),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 16,
+          ),
         ),
       );
     }
@@ -497,7 +501,7 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       elevation: overlapsContent ? 2 : 0,
       child: tabBar,
     );
