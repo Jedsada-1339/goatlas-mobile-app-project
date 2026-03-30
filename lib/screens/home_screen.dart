@@ -515,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         // Blog Cards
                         SizedBox(
-                          height: 250,
+                          height: 300,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             padding: const EdgeInsets.symmetric(horizontal: 20),
