@@ -5,6 +5,7 @@ import '../screens/profile_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/faq_support_screen.dart';
 import '../screens/rewards_screen.dart';
+import '../screens/settings_screen.dart';
 import '../utills/firebase_service.dart';
 
 import 'package:firebase_auth/firebase_auth.dart'; // เพิ่ม import สำหรับ FirebaseAuth
@@ -195,7 +196,15 @@ class _DrawerListviewState extends State<DrawerListview> {
                 icon: Icons.settings_rounded,
                 label: 'ตั้งค่า',
                 color: const Color(0xFF78909C),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.pop(context); // ปิด Drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
               ),
               _DrawerItem(
                 icon: Icons.help_rounded,
