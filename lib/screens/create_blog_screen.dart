@@ -110,6 +110,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
         readTime: readTime,
         tags: _tags,
         images: [_coverImageBase64!],
+        likedBy: [],
       );
 
       // บันทึกลง Firestore

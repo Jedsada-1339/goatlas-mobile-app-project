@@ -60,9 +60,7 @@ class BlogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -114,11 +112,8 @@ class BlogCard extends StatelessWidget {
                           ),
                           child: Text(
                             tag,
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(color: const Color(0xFF00BCD4)),
                           ),
                         );
                       }).toList(),
@@ -129,11 +124,9 @@ class BlogCard extends StatelessWidget {
                   // Title
                   Text(
                     post.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: colorScheme.onSurface,
-                      height: 1.3,
+                      fontWeight: FontWeight.bold,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -144,10 +137,8 @@ class BlogCard extends StatelessWidget {
                   // Content Preview
                   Text(
                     post.contentPreview,
-                    style: TextStyle(
-                      fontSize: 14,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                      height: 1.5,
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
@@ -184,11 +175,8 @@ class BlogCard extends StatelessWidget {
                           children: [
                             Text(
                               post.authorName,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: colorScheme.onSurface),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -197,17 +185,17 @@ class BlogCard extends StatelessWidget {
                               children: [
                                 Text(
                                   post.timeAgo,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                                 Text(
                                   ' • ${post.readTime} นาทีในการอ่าน',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                               ],
                             ),
@@ -225,14 +213,18 @@ class BlogCard extends StatelessWidget {
                               Icon(
                                 Icons.favorite_border,
                                 size: 14,
-                                color: colorScheme.outline,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${post.likes}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: colorScheme.onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -244,14 +236,18 @@ class BlogCard extends StatelessWidget {
                               Icon(
                                 Icons.chat_bubble_outline,
                                 size: 14,
-                                color: colorScheme.outline,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${post.comments}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: colorScheme.onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
