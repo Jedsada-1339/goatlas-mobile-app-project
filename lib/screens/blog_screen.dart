@@ -237,7 +237,15 @@ class BlogScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(Icons.article_outlined, color: colorScheme.onSurfaceVariant),
+          IconButton(
+            icon: Icon(Icons.bookmark_border),
+            color: colorScheme.onSurfaceVariant,
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('บทความที่บันทึกไว้')),
+              );
+            },
+          ),
           Text(
             'บทความ',
             style: TextStyle(
@@ -246,7 +254,15 @@ class BlogScreen extends StatelessWidget {
               color: colorScheme.onSurface,
             ),
           ),
-          Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+          IconButton(
+            icon: Icon(Icons.search),
+            color: colorScheme.onSurfaceVariant,
+            onPressed: () {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('ค้นหาบทความ')));
+            },
+          ),
         ],
       ),
     );
