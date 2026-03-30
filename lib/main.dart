@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
           seedColor: const Color(0xFF00BCD4),
           brightness: Brightness.light,
           primary: const Color(0xFF00BCD4),
+          surface: const Color(0xFFF8FAFC),
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.promptTextTheme(Theme.of(context).textTheme),
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
+          centerTitle: true,
         ),
       ),
 
@@ -50,14 +52,16 @@ class MyApp extends StatelessWidget {
           seedColor: const Color(0xFF00BCD4),
           brightness: Brightness.dark,
           primary: const Color(0xFF00BCD4),
+          surface: const Color(0xFF0F172A),
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.promptTextTheme(ThemeData.dark().textTheme),
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // dark background
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
+          centerTitle: true,
         ),
       ),
 

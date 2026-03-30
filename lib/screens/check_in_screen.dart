@@ -72,8 +72,9 @@ class _CheckInScreenState extends State<CheckInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text('เช็คอิน - ${widget.place.name}'),
         elevation: 0,
@@ -88,18 +89,18 @@ class _CheckInScreenState extends State<CheckInScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDDF5FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.stars, color: Color(0xFF1B4965), size: 16),
+                    Icon(Icons.stars, color: colorScheme.onPrimaryContainer, size: 16),
                     const SizedBox(width: 8),
-                    const Text(
+                    Text(
                       'LOCATION CHALLENGE',
                       style: TextStyle(
-                        color: Color(0xFF1B4965),
+                        color: colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -109,13 +110,13 @@ class _CheckInScreenState extends State<CheckInScreen> {
               ),
               const SizedBox(height: 24),
               // Main Title
-              const Text(
+              Text(
                 'ถ่ายรูปคู่กับสถานที่เพื่อรับ\nคะแนน',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1B4965),
+                  color: colorScheme.primary,
                   height: 1.2,
                 ),
               ),
@@ -126,7 +127,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -201,37 +202,37 @@ class _CheckInScreenState extends State<CheckInScreen> {
                           child: Container(
                             width: 300,
                             height: 400,
-                            color: Colors.white,
+                            color: colorScheme.surfaceVariant.withOpacity(0.3),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
                                   width: 80,
                                   height: 80,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFDDF5FF),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primaryContainer,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.camera_alt_outlined,
                                     size: 40,
-                                    color: Color(0xFF1B4965),
+                                    color: colorScheme.onPrimaryContainer,
                                   ),
                                 ),
                                 const SizedBox(height: 24),
-                                const Text(
+                                Text(
                                   'ยังไม่ได้ถ่ายรูป',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1B4965),
+                                    color: colorScheme.primary,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'แตะที่นี่หรือปุ่มด้านล่างเพื่อเปิดกล้อง',
                                   style: TextStyle(
-                                    color: Colors.grey[600],
+                                    color: colorScheme.onSurfaceVariant,
                                     fontSize: 14,
                                   ),
                                 ),

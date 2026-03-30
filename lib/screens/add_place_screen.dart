@@ -88,7 +88,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     return filtered;
   }
 
-  Color get primaryColor => Theme.of(context).primaryColor;
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
 
   @override
   void dispose() {
@@ -98,8 +98,9 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -121,7 +122,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface.withOpacity(0.8)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -135,18 +136,18 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.chevron_left, color: Color(0xFF64748B)),
+                child: Icon(Icons.chevron_left, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ),
           ),
           // Title
-          const Text(
+          Text(
             'เพิ่มสถานที่',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.5,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           // Placeholder for symmetry
@@ -157,15 +158,16 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   Widget _buildSearchSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: colorScheme.shadow.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -174,18 +176,18 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         child: TextField(
           controller: _searchController,
           onChanged: (value) => setState(() {}),
-          style: const TextStyle(fontSize: 16, color: Color(0xFF0F172A)),
+          style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: 'ค้นหาสถานที่ในประเทศไทย...',
-            hintStyle: TextStyle(fontSize: 16, color: Colors.grey[400]),
-            prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+            hintStyle: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     onPressed: () {
                       _searchController.clear();
                       setState(() {});
                     },
-                    icon: const Icon(Icons.clear, color: Color(0xFF94A3B8)),
+                    icon: Icon(Icons.clear, color: colorScheme.onSurfaceVariant),
                   )
                 : null,
             border: InputBorder.none,
@@ -200,6 +202,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   Widget _buildCategoryChips() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 48,
       child: ListView.builder(
@@ -224,18 +227,18 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? primaryColor : const Color(0xFFF1F5F9),
+                  color: isSelected ? primaryColor : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(20),
                   border: isSelected
                       ? null
-                      : Border.all(color: const Color(0xFFE2E8F0)),
+                      : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 child: Text(
                   category,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: isSelected ? Colors.white : const Color(0xFF64748B),
+                    color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -296,13 +299,14 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   Widget _buildPlaceCard(PlaceModel place) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -344,10 +348,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                           Expanded(
                             child: Text(
                               place.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF0F172A),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -423,7 +427,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 20),
+                  child: Icon(Icons.add, color: colorScheme.onPrimary, size: 20),
                 ),
               ],
             ),
@@ -437,21 +441,21 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: const Color(0xFF94A3B8)),
+          Icon(icon, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF94A3B8),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -463,6 +467,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   void _showAddConfirmation(PlaceModel place) {
+    final colorScheme = Theme.of(context).colorScheme;
     // กำหนดค่าเริ่มต้นตามหมวดหมู่ (ถ้ามี)
     String selectedType = 'attraction';
     if (place.category.contains('อาหาร') ||
@@ -483,12 +488,12 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
             ),
-            title: const Text(
+            title: Text(
               'เพิ่มสถานที่',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             content: SizedBox(
@@ -517,27 +522,27 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                   const SizedBox(height: 12),
                   Text(
                     place.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${place.location} • ${place.duration}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF64748B),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'ประเภทสถานที่:',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -577,7 +582,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 child: Text(
                   'ยกเลิก',
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -593,7 +598,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -618,16 +623,17 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     bool isSelected,
     VoidCallback onTap,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor : const Color(0xFFF1F5F9),
+          color: isSelected ? primaryColor : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
           borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? null
-              : Border.all(color: const Color(0xFFE2E8F0)),
+              : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -635,7 +641,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.white : const Color(0xFF64748B),
+              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Text(
@@ -643,7 +649,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF64748B),
+                color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
               ),
             ),
           ],

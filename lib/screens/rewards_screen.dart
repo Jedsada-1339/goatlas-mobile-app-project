@@ -31,11 +31,12 @@ class _RewardsScreenState extends State<RewardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('คะแนน & รางวัล'),
-        backgroundColor: const Color(0xFF1A73E8),
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -45,9 +46,9 @@ class _RewardsScreenState extends State<RewardsScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(32),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFF1A73E8), Color(0xFF0D47A1)],
+                      colors: [colorScheme.primary, colorScheme.primary.withOpacity(0.8)],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -126,9 +127,9 @@ class _RewardsScreenState extends State<RewardsScreen> {
         trailing: ElevatedButton(
           onPressed: canRedeem ? () => _redeem(title, cost) : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: canRedeem ? const Color(0xFF1A73E8) : Colors.grey,
+            backgroundColor: canRedeem ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant,
           ),
-          child: const Text('แลกสิทธิ์', style: TextStyle(color: Colors.white)),
+          child: Text('แลกสิทธิ์', style: TextStyle(color: canRedeem ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
       ),
     );

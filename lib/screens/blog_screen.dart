@@ -40,13 +40,15 @@ class BlogScreen extends StatelessWidget {
 
                   final allPosts = snapshot.data ?? [];
 
-                  // ไม่มีข้อมูล
                   if (allPosts.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'ยังไม่มีบทความ\nกด + เพื่อเพิ่มบทความแรก!',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     );
                   }

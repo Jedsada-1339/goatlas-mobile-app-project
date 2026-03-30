@@ -9,7 +9,7 @@ class BlogInformationScreen extends StatelessWidget {
 
   const BlogInformationScreen({super.key, required this.post});
 
-  Widget _buildImage(String imageData) {
+  Widget _buildImage(BuildContext context, String imageData) {
     // ตรวจสอบว่าเป็น Base64 หรือไม่
     if (imageData.startsWith('data:image')) {
       try {
@@ -23,10 +23,10 @@ class BlogInformationScreen extends StatelessWidget {
           width: double.infinity,
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              color: Colors.grey[300],
+              color: Theme.of(context).colorScheme.surfaceVariant,
               child: Icon(
                 Icons.broken_image,
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 50,
               ),
             );
@@ -34,15 +34,15 @@ class BlogInformationScreen extends StatelessWidget {
         );
       } catch (e) {
         return Container(
-          color: Colors.grey[300],
+          color: Theme.of(context).colorScheme.surfaceVariant,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.grey[500], size: 50),
+              Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 50),
               const SizedBox(height: 8),
               Text(
                 'ไม่สามารถโหลดรูปภาพได้',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -55,12 +55,12 @@ class BlogInformationScreen extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         placeholder: (context, url) => Container(
-          color: Colors.grey[200],
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) => Container(
-          color: Colors.grey[300],
-          child: Icon(Icons.broken_image, color: Colors.grey[500], size: 50),
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          child: Icon(Icons.broken_image, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 50),
         ),
       );
     }
@@ -68,34 +68,35 @@ class BlogInformationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           // AppBar with Back Button
           SliverAppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: colorScheme.surface,
             elevation: 0,
             pinned: true,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
                 size: 20,
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
+            title: Text(
               'รายละเอียดบทความ',
               style: TextStyle(
-                color: Colors.black87,
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.share_outlined, color: Colors.black87),
+                icon: Icon(Icons.share_outlined, color: colorScheme.onSurface),
                 onPressed: () {
                   // TODO: แชร์บทความ
                   ScaffoldMessenger.of(
@@ -104,7 +105,7 @@ class BlogInformationScreen extends StatelessWidget {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.bookmark_border, color: Colors.black87),
+                icon: Icon(Icons.bookmark_border, color: colorScheme.onSurface),
                 onPressed: () {
                   // TODO: บันทึกบทความ
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -131,16 +132,16 @@ class BlogInformationScreen extends StatelessWidget {
                         backgroundImage: post.authorAvatar.isNotEmpty
                             ? CachedNetworkImageProvider(post.authorAvatar)
                             : null,
-                        backgroundColor: const Color(0xFF00BCD4),
+                        backgroundColor: colorScheme.primary,
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: colorScheme.onPrimary,
                                 ),
                               )
                             : null,
@@ -154,10 +155,10 @@ class BlogInformationScreen extends StatelessWidget {
                           children: [
                             Text(
                               'By ${post.authorName}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -167,7 +168,7 @@ class BlogInformationScreen extends StatelessWidget {
                                   'Tag : ',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.grey[600],
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 // Tags
@@ -183,15 +184,15 @@ class BlogInformationScreen extends StatelessWidget {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF00BCD4),
+                                            color: colorScheme.primary,
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
                                           ),
                                           child: Text(
                                             tag,
-                                            style: const TextStyle(
-                                              color: Colors.white,
+                                            style: TextStyle(
+                                              color: colorScheme.onPrimary,
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -218,7 +219,7 @@ class BlogInformationScreen extends StatelessWidget {
                       child: SizedBox(
                         height: 240,
                         width: double.infinity,
-                        child: _buildImage(post.coverImage),
+                        child: _buildImage(context, post.coverImage),
                       ),
                     ),
                   ),
@@ -230,10 +231,10 @@ class BlogInformationScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     post.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                       height: 1.3,
                     ),
                   ),
@@ -249,23 +250,23 @@ class BlogInformationScreen extends StatelessWidget {
                       Icon(
                         Icons.access_time,
                         size: 16,
-                        color: Colors.grey[500],
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         post.timeAgo,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 16),
                       Icon(
                         Icons.timer_outlined,
                         size: 16,
-                        color: Colors.grey[500],
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '${post.readTime} นาทีในการอ่าน',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -274,7 +275,7 @@ class BlogInformationScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Divider
-                Divider(height: 1, color: Colors.grey[300]),
+                Divider(height: 1, color: colorScheme.outlineVariant),
 
                 const SizedBox(height: 20),
 
@@ -283,9 +284,9 @@ class BlogInformationScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     post.content,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                       height: 1.6,
                       letterSpacing: 0.2,
                     ),
@@ -300,9 +301,9 @@ class BlogInformationScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: colorScheme.surfaceVariant.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[200]!),
+                      border: Border.all(color: colorScheme.outlineVariant),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -312,16 +313,16 @@ class BlogInformationScreen extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.favorite,
-                              color: Colors.red[400],
+                              color: colorScheme.error,
                               size: 24,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               '${post.likes}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -329,7 +330,7 @@ class BlogInformationScreen extends StatelessWidget {
                               'ถูกใจ',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -339,7 +340,7 @@ class BlogInformationScreen extends StatelessWidget {
                         Container(
                           height: 30,
                           width: 1,
-                          color: Colors.grey[300],
+                          color: colorScheme.outlineVariant,
                         ),
 
                         // Comments
@@ -347,16 +348,16 @@ class BlogInformationScreen extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.chat_bubble,
-                              color: Colors.blue[400],
+                              color: colorScheme.primary,
                               size: 24,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               '${post.comments}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -364,7 +365,7 @@ class BlogInformationScreen extends StatelessWidget {
                               'ความคิดเห็น',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
