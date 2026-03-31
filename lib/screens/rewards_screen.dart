@@ -12,6 +12,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   int _currentPoints = 0;
   bool _isLoading = true;
+  bool _isRedeeming = false;
 
   @override
   void initState() {
@@ -114,7 +115,10 @@ class _RewardsScreenState extends State<RewardsScreen> {
   }
 
   Widget _rewardItem(String title, int cost, IconData icon) {
+    // ปุ่มจะกดได้ก็ต่อเมื่อ คะแนนพอ และ ไม่ได้กำลังรอการทำรายการอื่นอยู่
     bool canRedeem = _currentPoints >= cost;
+    bool isButtonEnabled = canRedeem && !_isRedeeming;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
@@ -125,22 +129,65 @@ class _RewardsScreenState extends State<RewardsScreen> {
         title: Text(title),
         subtitle: Text('ใช้ $cost คะแนน'),
         trailing: ElevatedButton(
-          onPressed: canRedeem ? () => _redeem(title, cost) : null,
+          onPressed: isButtonEnabled ? () => _redeem(title, cost) : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: canRedeem ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant,
           ),
-          child: Text('แลกสิทธิ์', style: TextStyle(color: canRedeem ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: _isRedeeming && canRedeem // แสดง loading เฉพาะถ้ากดตัวที่กดได้
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  'แลกสิทธิ์',
+                  style: TextStyle(color: Colors.white),
+                ),
         ),
       ),
     );
   }
 
   void _redeem(String name, int cost) async {
-    // โค้ดสำหรับแลกคะแนน
-    await _firebaseService.updatePoints(-cost);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('แลก $name สำเร็จ!')));
-    _loadPoints(); // รีโหลดคะแนนใหม่
+    if (_isRedeeming) return;
+
+    // ตรวจสอบคะแนนอีกครั้งเพื่อความชัวร์
+    if (_currentPoints < cost) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('คะแนนของคุณไม่เพียงพอ')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isRedeeming = true;
+    });
+
+    try {
+      // โค้ดสำหรับแลกคะแนน
+      await _firebaseService.updatePoints(-cost);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('แลก $name สำเร็จ!')),
+        );
+        await _loadPoints(); // รีโหลดคะแนนใหม่
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRedeeming = false;
+        });
+      }
+    }
   }
 }
