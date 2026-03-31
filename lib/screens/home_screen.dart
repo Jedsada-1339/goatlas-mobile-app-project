@@ -219,6 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       // Right Side Drawer Menu
       endDrawer: Drawer(child: DrawerListview()),
@@ -248,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.black.withOpacity(0.3),
-                      Colors.white.withOpacity(0.9),
+                      colorScheme.surface.withOpacity(0.9),
                     ],
                   ),
                 ),
@@ -330,9 +333,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Main Content Section
                 SliverToBoxAdapter(
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30),
                       ),
@@ -340,14 +343,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
                           child: Text(
                             'สถานที่ท่องเที่ยวแนะนำ',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -428,14 +431,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 10),
 
                         // Trip Section Title
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
                           child: Text(
                             'ทริปยอดนิยม',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -512,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         // Blog Cards
                         SizedBox(
-                          height: 250,
+                          height: 300,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             padding: const EdgeInsets.symmetric(horizontal: 20),

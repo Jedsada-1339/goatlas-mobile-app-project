@@ -50,24 +50,7 @@ class BlogService {
         .map((snapshot) {
           return snapshot.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            final post = BlogPost.fromJson(data);
-            
-            // ส่งคืนข้อมูลตามที่ถูกบันทึกมา ป้องกันการนำรูป/ชื่อของ user ปัจจุบันไปใส่แทน
-            return BlogPost(
-              id: post.id,
-              title: post.title,
-              content: post.content,
-              authorName: post.authorName,
-              authorAvatar: post.authorAvatar,
-              coverImage: post.coverImage,
-              publishedDate: post.publishedDate,
-              readTime: post.readTime,
-              likes: post.likes,
-              comments: post.comments,
-              tags: post.tags,
-              images: post.images,
-              authorId: post.authorId,
-            );
+            return BlogPost.fromJson({...data, 'id': doc.id});
           }).toList();
         });
   }
@@ -92,5 +75,32 @@ class BlogService {
     }
 
     await _blogsCollection.doc(blogId).delete();
+  }
+
+  Future<void> toggleLike(String blogId) async {
+    final uid = _currentUserId;
+    if (uid == null) throw Exception('ไม่พบข้อมูลผู้ใช้');
+
+    final docRef = _blogsCollection.doc(blogId);
+    final doc = await docRef.get();
+
+    if (!doc.exists) throw Exception('ไม่พบบทความ');
+
+    final data = doc.data() as Map<String, dynamic>;
+    final List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
+
+    if (likedBy.contains(uid)) {
+      // 1. ถ้าเคยไลค์แล้ว -> เอาชื่อออก และ ลดแต้มลง 1
+      await docRef.update({
+        'likedBy': FieldValue.arrayRemove([uid]),
+        'likes': FieldValue.increment(-1), // ลดลง 1 จากค่าที่มีอยู่จริง
+      });
+    } else {
+      // 2. ถ้ายังไม่เคยไลค์ -> เพิ่มชื่อเข้า และ เพิ่มแต้มขึ้น 1
+      await docRef.update({
+        'likedBy': FieldValue.arrayUnion([uid]),
+        'likes': FieldValue.increment(1), // เพิ่มขึ้น 1 จากค่าที่มีอยู่จริง
+      });
+    }
   }
 }

@@ -284,8 +284,9 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
           // Map Placeholder (Fixed at top)
@@ -295,7 +296,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
             right: 0,
             height: MediaQuery.of(context).size.height * 0.55,
             child: Container(
-              color: const Color(0xFFE2E8F0),
+              color: colorScheme.surfaceVariant,
               child: FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
@@ -366,9 +367,9 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
               // We'll wrap the listener adding in a unique way or just check in a NotificationListener
 
               return Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
@@ -389,7 +390,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                           width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFCBD5E1),
+                            color: colorScheme.outlineVariant,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -405,18 +406,18 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                               children: [
                                 Text(
                                   _trip.name,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F172A),
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   _trip.dateRangeText,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFF64748B),
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -427,16 +428,16 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: colorScheme.surface,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: const Color(0xFFE2E8F0),
+                                  color: colorScheme.outlineVariant,
                                 ),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.edit_outlined,
                                 size: 20,
-                                color: Color(0xFF0F172A),
+                                color: colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -475,7 +476,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -485,7 +486,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
+                child: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
               ),
             ),
           ),
@@ -495,8 +496,8 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
         onPressed: _launchDayRoute,
         icon: const Icon(Icons.map),
         label: Text(_selectedFilter == -1 ? 'นำทางทริปนี้' : 'นำทางวันนี้'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
     );
   }
@@ -627,20 +628,20 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.white,
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : const Color(0xFFE2E8F0),
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outlineVariant,
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
                           color: Theme.of(
                             context,
-                          ).primaryColor.withOpacity(0.3),
+                          ).colorScheme.primary.withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -656,8 +657,8 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: isSelected
-                          ? Colors.white.withOpacity(0.9)
-                          : const Color(0xFF94A3B8),
+                          ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.9)
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -665,8 +666,8 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                     Icon(
                       Icons.map_outlined,
                       color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF0F172A),
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurface,
                       size: 24,
                     )
                   else
@@ -676,8 +677,8 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: isSelected
-                            ? Colors.white
-                            : const Color(0xFF0F172A),
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                 ],
@@ -713,7 +714,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -721,17 +722,17 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Text(
                 dateText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -755,7 +756,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                   left: 24,
                   top: 0,
                   bottom: 0,
-                  child: Container(width: 2, color: const Color(0xFFE2E8F0)),
+                  child: Container(width: 2, color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 Column(
                   children: List.generate(dayPlan.places.length, (placeIndex) {
@@ -797,7 +798,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                     decoration: BoxDecoration(
                       color: place.isVisited
                           ? Theme.of(context).primaryColor
-                          : Colors.white,
+                          : Theme.of(context).colorScheme.onPrimary,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: place.isVisited
@@ -807,7 +808,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                       ),
                     ),
                     child: place.isVisited
-                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        ? Icon(Icons.check, size: 14, color: Theme.of(context).colorScheme.onPrimary)
                         : null,
                   ),
                 ],
@@ -829,7 +830,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -997,7 +998,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
         break;
       default:
         icon = Icons.camera_alt;
-        color = Theme.of(context).primaryColor;
+        color = Theme.of(context).colorScheme.primary;
     }
 
     return Container(

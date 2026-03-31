@@ -3,33 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/blog_model.dart';
 import '../components/blog_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 
-class CreateBlogScreen extends StatefulWidget {
-  final String authorName;
-  final String authorAvatar;
+class EditBlogScreen extends StatefulWidget {
+  final BlogPost post;
 
-  const CreateBlogScreen({
-    super.key,
-    required this.authorName,
-    required this.authorAvatar,
-  });
+  const EditBlogScreen({super.key, required this.post});
 
   @override
-  State<CreateBlogScreen> createState() => _CreateBlogScreenState();
+  State<EditBlogScreen> createState() => _EditBlogScreenState();
 }
 
-class _CreateBlogScreenState extends State<CreateBlogScreen> {
+class _EditBlogScreenState extends State<EditBlogScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
   final _tagController = TextEditingController();
 
-  File? _coverImageFile; // รูปที่เลือกจากเครื่อง
-  String? _coverImageBase64;
-  List<String> _tags = [];
+  File? _coverImageFile; // รูปใหม่ที่เลือก
+  String? _coverImageBase64; // Base64 ของรูปใหม่
+  late List<String> _tags;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // ใช้ข้อมูลเดิมจากบล็อก
+    _titleController = TextEditingController(text: widget.post.title);
+    _contentController = TextEditingController(text: widget.post.content);
+    _tags = List.from(widget.post.tags);
+    // ใช้รูปปกเดิม
+    _coverImageBase64 = widget.post.coverImage;
+  }
 
   @override
   void dispose() {
@@ -39,7 +44,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     super.dispose();
   }
 
-  // เลือกรูปปก
+  // เลือกรูปปกใหม่
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(
@@ -55,8 +60,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
       setState(() {
         _coverImageFile = File(picked.path);
-        _coverImageBase64 =
-            'data:image/jpeg;base64,$base64Image'; // เหมือน trip
+        _coverImageBase64 = 'data:image/jpeg;base64,$base64Image';
       });
     }
   }
@@ -75,10 +79,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     _tagController.clear();
   }
 
-  // บันทึกบทความ → Firebase
+  // บันทึกการแก้ไข
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_coverImageFile == null) {
+    if (_coverImageBase64 == null || _coverImageBase64!.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('กรุณาเลือกรูปปกบทความ')));
@@ -88,42 +92,39 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // คำนวณเวลาอ่าน
+      // คำนวณเวลาอ่านใหม่
       final wordCount = _contentController.text.trim().split(' ').length;
       final readTime = (wordCount / 200).ceil().clamp(1, 60);
 
-      // สร้าง BlogPost
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('ไม่พบข้อมูลผู้ใช้ กรุณาล็อกอินใหม่');
-      }
-
-      final newPost = BlogPost(
-        id: '',
+      // อัปเดต BlogPost
+      final updatedPost = BlogPost(
+        id: widget.post.id,
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
-        authorName: widget.authorName,
-        authorAvatar: widget.authorAvatar,
-        authorId: user.uid, // ✅ เพิ่มบรรทัดนี้!
+        authorName: widget.post.authorName,
+        authorAvatar: widget.post.authorAvatar,
+        authorId: widget.post.authorId,
         coverImage: _coverImageBase64!,
-        publishedDate: DateTime.now(),
+        publishedDate: widget.post.publishedDate, // คงวันที่เดิม
         readTime: readTime,
         tags: _tags,
         images: [_coverImageBase64!],
-        likedBy: [],
+        likes: widget.post.likes, // คงยอดไลค์เดิม
+        comments: widget.post.comments, // คงยอดคอมเมนต์เดิม
+        likedBy: widget.post.likedBy, // คงรายชื่อคนที่ไลค์เดิม
       );
 
-      // บันทึกลง Firestore
-      await BlogService.instance.createBlog(newPost);
+      // อัปเดตใน Firestore
+      await BlogService.instance.updateBlog(updatedPost);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('เผยแพร่บทความสำเร็จ!'),
+            content: Text('แก้ไขบทความสำเร็จ!'),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context);
+        Navigator.pop(context); // กลับไปหน้าก่อนหน้า
       }
     } catch (e) {
       if (mounted) {
@@ -157,7 +158,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'เขียนบทความ',
+          'แก้ไขบทความ',
           style: TextStyle(
             color: colorScheme.onSurface,
             fontWeight: FontWeight.bold,
@@ -165,7 +166,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
           ),
         ),
         actions: [
-          // ปุ่มเผยแพร่
+          // ปุ่มบันทึก
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: _isLoading
@@ -179,7 +180,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                 : TextButton(
                     onPressed: _submit,
                     child: Text(
-                      'เผยแพร่',
+                      'บันทึก',
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -235,7 +236,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
               TextFormField(
                 controller: _contentController,
                 maxLines: 5,
-                decoration: _inputDecoration('เขียนเนื้อหาบทความที่นี่...', colorScheme),
+                decoration: _inputDecoration(
+                  'เขียนเนื้อหาบทความที่นี่...',
+                  colorScheme,
+                ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'กรุณาใส่เนื้อหา' : null,
               ),
@@ -257,7 +261,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _tagController,
-                      decoration: _inputDecoration('เช่น เที่ยว, อาหาร...', colorScheme),
+                      decoration: _inputDecoration(
+                        'เช่น เที่ยว, อาหาร...',
+                        colorScheme,
+                      ),
                       onFieldSubmitted: _addTag,
                     ),
                   ),
@@ -283,7 +290,11 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   children: _tags.map((tag) {
                     return Chip(
                       label: Text(tag),
-                      deleteIcon: Icon(Icons.close, size: 16, color: colorScheme.primary),
+                      deleteIcon: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: colorScheme.primary,
+                      ),
                       onDeleted: () => setState(() => _tags.remove(tag)),
                       backgroundColor: colorScheme.primary.withOpacity(0.1),
                       labelStyle: TextStyle(
@@ -291,7 +302,9 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                       side: BorderSide.none,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -308,6 +321,49 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
   // Widget: เลือกรูปปก
   // ─────────────────────────────────────────────
   Widget _buildCoverImagePicker() {
+    Widget imageWidget;
+
+    // กรณีเลือกรูปใหม่จากเครื่อง
+    if (_coverImageFile != null) {
+      imageWidget = Image.file(_coverImageFile!, fit: BoxFit.cover);
+    }
+    // กรณีใช้รูปเดิมที่เป็น Base64
+    else if (_coverImageBase64 != null &&
+        _coverImageBase64!.startsWith('data:image')) {
+      try {
+        final base64String = _coverImageBase64!.split(',').last;
+        final bytes = base64Decode(base64String);
+        imageWidget = Image.memory(bytes, fit: BoxFit.cover);
+      } catch (e) {
+        imageWidget = Container(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          child: const Icon(Icons.broken_image, size: 50),
+        );
+      }
+    }
+    // กรณีไม่มีรูป
+    else {
+      imageWidget = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_photo_alternate_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'เลือกรูปปกบทความ',
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      );
+    }
+
     return GestureDetector(
       onTap: _pickImage,
       child: Container(
@@ -316,58 +372,35 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-          image: _coverImageFile != null
-              ? DecorationImage(
-                  image: FileImage(_coverImageFile!),
-                  fit: BoxFit.cover,
-                )
-              : null,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
         ),
-        child: _coverImageFile == null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'เลือกรูปปกบทความ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'แตะเพื่อเลือกรูปจากอัลบั้ม',
-                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7)),
-                  ),
-                ],
-              )
-            : Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.black54,
-                    radius: 18,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.edit,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                      onPressed: _pickImage,
-                      padding: EdgeInsets.zero,
-                    ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: imageWidget,
+            ),
+            // ปุ่มแก้ไข (แสดงเมื่อมีรูป)
+            if (_coverImageBase64 != null)
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: CircleAvatar(
+                  backgroundColor: Colors.black54,
+                  radius: 18,
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, size: 16, color: Colors.white),
+                    onPressed: _pickImage,
+                    padding: EdgeInsets.zero,
                   ),
                 ),
               ),
+          ],
+        ),
       ),
     );
   }

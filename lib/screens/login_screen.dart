@@ -68,7 +68,10 @@ class _LoginPageState extends State<LoginPage> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
           );
         }
       } catch (e) {
@@ -76,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -121,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
+          SnackBar(content: Text(errMsg), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } on PlatformException catch (e) {
@@ -135,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errMsg), backgroundColor: Colors.red),
+          SnackBar(content: Text(errMsg), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } catch (e) {
@@ -143,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

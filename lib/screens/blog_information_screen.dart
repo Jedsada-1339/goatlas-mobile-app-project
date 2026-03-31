@@ -1,13 +1,29 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:goatlas/components/blog_service.dart';
 import 'package:goatlas/components/custom_bottom_nav_bar.dart';
 import '../models/blog_model.dart';
 import 'dart:convert';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:goatlas/screens/edit_blog_screen.dart';
 
-class BlogInformationScreen extends StatelessWidget {
+class BlogInformationScreen extends StatefulWidget {
   final BlogPost post;
 
   const BlogInformationScreen({super.key, required this.post});
+
+  @override
+  State<BlogInformationScreen> createState() => _BlogInformationScreenState();
+}
+
+class _BlogInformationScreenState extends State<BlogInformationScreen> {
+  bool _isLiking = false;
+  bool get _isOwner {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    return uid != null && uid == widget.post.authorId;
+  }
 
   Widget _buildImage(String imageData) {
     // ตรวจสอบว่าเป็น Base64 หรือไม่
@@ -23,10 +39,10 @@ class BlogInformationScreen extends StatelessWidget {
           width: double.infinity,
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              color: Colors.grey[300],
+              color: Theme.of(context).colorScheme.surfaceVariant,
               child: Icon(
                 Icons.broken_image,
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 50,
               ),
             );
@@ -34,15 +50,21 @@ class BlogInformationScreen extends StatelessWidget {
         );
       } catch (e) {
         return Container(
-          color: Colors.grey[300],
+          color: Theme.of(context).colorScheme.surfaceVariant,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.grey[500], size: 50),
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 50,
+              ),
               const SizedBox(height: 8),
               Text(
                 'ไม่สามารถโหลดรูปภาพได้',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -55,61 +77,181 @@ class BlogInformationScreen extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         placeholder: (context, url) => Container(
-          color: Colors.grey[200],
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) => Container(
-          color: Colors.grey[300],
-          child: Icon(Icons.broken_image, color: Colors.grey[500], size: 50),
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          child: Icon(
+            Icons.broken_image,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: 50,
+          ),
         ),
       );
     }
   }
 
+  // ฟังก์ชันกดไลค์
+  Future<void> _handleLike() async {
+    if (_isLiking) return;
+
+    setState(() => _isLiking = true);
+
+    try {
+      await BlogService.instance.toggleLike(widget.post.id);
+    } finally {
+      if (mounted) setState(() => _isLiking = false);
+    }
+  }
+
+  // ฟังก์ชันแก้ไขบล็อก
+  void _editBlog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditBlogScreen(post: widget.post),
+      ),
+    );
+  }
+
+  // ฟังก์ชันลบบล็อก
+  Future<void> _deleteBlog() async {
+    // 1. ถามยืนยัน
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ยืนยันการลบ'),
+        content: const Text(
+          'คุณต้องการลบบทความนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        // เก็บ Navigator และ Messenger ไว้ก่อนเผื่อ context เปลี่ยน
+        final navigator = Navigator.of(context);
+        final messenger = ScaffoldMessenger.of(context);
+
+        await BlogService.instance.deleteBlog(widget.post.id);
+
+        if (!mounted) return;
+
+        // แสดง SnackBar
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('ลบบทความสำเร็จ'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // 2. ปิดหน้า Detail (กลับไปหน้า Feed)
+        navigator.pop();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('เกิดข้อผิดพลาด: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  // แสดง Bottom Sheet สำหรับเลือกแก้ไขหรือลบ
+  void _showOptionsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.blue),
+              title: const Text('แก้ไขบทความ'),
+              onTap: () {
+                Navigator.pop(context);
+                _editBlog();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text(
+                'ลบบทความ',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _deleteBlog();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           // AppBar with Back Button
           SliverAppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: colorScheme.surface,
             elevation: 0,
             pinned: true,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
                 size: 20,
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
+            title: Text(
               'รายละเอียดบทความ',
               style: TextStyle(
-                color: Colors.black87,
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.share_outlined, color: Colors.black87),
+                icon: Icon(Icons.share_outlined, color: colorScheme.onSurface),
                 onPressed: () {
-                  // TODO: แชร์บทความ
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(const SnackBar(content: Text('แชร์บทความ')));
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.bookmark_border, color: Colors.black87),
+                icon: const Icon(Icons.bookmark_outline, color: Colors.black87),
                 onPressed: () {
-                  // TODO: บันทึกบทความ
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('บันทึกบทความแล้ว')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('บันทึกบทความ')));
                 },
               ),
             ],
@@ -117,271 +259,355 @@ class BlogInformationScreen extends StatelessWidget {
 
           // Content
           SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Author Info Section
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      // Author Avatar
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundImage: post.authorAvatar.isNotEmpty
-                            ? CachedNetworkImageProvider(post.authorAvatar)
-                            : null,
-                        backgroundColor: const Color(0xFF00BCD4),
-                        child: post.authorAvatar.isEmpty
-                            ? Text(
-                                post.authorName.isNotEmpty
-                                    ? post.authorName[0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 12),
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('blogs')
+                  .doc(widget.post.id)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return const Center(child: CircularProgressIndicator());
 
-                      // Author Name & Time
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'By ${post.authorName}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
+                // เพิ่มการเช็ค exists เพื่อกัน Crash ตอนลบ
+                if (!snapshot.data!.exists) return const SizedBox();
+
+                final data = snapshot.data!.data() as Map<String, dynamic>;
+                final post = BlogPost.fromJson({
+                  ...data,
+                  'id': snapshot.data!.id,
+                });
+
+                final uid = FirebaseAuth.instance.currentUser?.uid;
+                final isLiked = post.likedBy.contains(uid);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Author Info Section
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          // Author Avatar
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundImage: widget.post.authorAvatar.isNotEmpty
+                                ? CachedNetworkImageProvider(
+                                    widget.post.authorAvatar,
+                                  )
+                                : null,
+                            backgroundColor: const Color(0xFF00BCD4),
+                            child: widget.post.authorAvatar.isEmpty
+                                ? Text(
+                                    widget.post.authorName.isNotEmpty
+                                        ? widget.post.authorName[0]
+                                              .toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Author Name & Time
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Tag : ',
+                                  'By ${widget.post.authorName}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Tag : ',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    // Tags
+                                    if (widget.post.tags.isNotEmpty)
+                                      Expanded(
+                                        child: Wrap(
+                                          spacing: 6,
+                                          runSpacing: 6,
+                                          children: widget.post.tags.take(3).map(
+                                            (tag) {
+                                              return Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 4,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFF00BCD4,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: Text(
+                                                  tag,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ).toList(),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Cover Image
+                    if (post.coverImage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: SizedBox(
+                            height: 240,
+                            width: double.infinity,
+                            child: _buildImage(
+                              post.coverImage,
+                            ), // ใช้ post แทน widget.post
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+
+                    // Title
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        post.title,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Meta Info
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            post.timeAgo,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 16,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${post.readTime} นาทีในการอ่าน',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Divider
+                    Divider(height: 1, color: Colors.grey[300]),
+
+                    const SizedBox(height: 20),
+
+                    // Content
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: MarkdownBody(
+                        data: post.content,
+
+                        styleSheet: MarkdownStyleSheet(
+                          p: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            height: 1.6,
+                          ),
+                          h1: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          h2: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          strong: const TextStyle(fontWeight: FontWeight.bold),
+                          blockquote: const TextStyle(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // ─────────────────────────────────────────────
+                    // Engagement Section (Like, Comment)
+                    // ─────────────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            // ── Likes (กดได้) ──
+                            InkWell(
+                              onTap: _isLiking ? null : _handleLike,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    _isLiking
+                                        ? const SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Icon(
+                                            isLiked // ใช้ตัวแปร isLiked ที่คำนวณจาก snapshot ด้านบนแล้ว
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color: isLiked
+                                                ? Colors.red[400]
+                                                : Colors.grey[600],
+                                            size: 24,
+                                          ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${post.likes}', //
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'ถูกใจ',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Divider
+                            Container(
+                              height: 30,
+                              width: 1,
+                              color: Colors.grey[300],
+                            ),
+
+                            // ── Comments (ยังไม่ทำงาน) ──
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  color: Colors.grey[600],
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${widget.post.comments}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'ความคิดเห็น',
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     color: Colors.grey[600],
                                   ),
                                 ),
-                                // Tags
-                                if (post.tags.isNotEmpty)
-                                  Expanded(
-                                    child: Wrap(
-                                      spacing: 6,
-                                      runSpacing: 6,
-                                      children: post.tags.take(3).map((tag) {
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF00BCD4),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            tag,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
                               ],
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                // Cover Image
-                if (post.coverImage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: SizedBox(
-                        height: 240,
-                        width: double.infinity,
-                        child: _buildImage(post.coverImage),
-                      ),
                     ),
-                  ),
 
-                const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                // Title
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    post.title,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      height: 1.3,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Meta Info
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 16,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        post.timeAgo,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 16,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${post.readTime} นาทีในการอ่าน',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Divider
-                Divider(height: 1, color: Colors.grey[300]),
-
-                const SizedBox(height: 20),
-
-                // Content
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    post.content,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      height: 1.6,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // Engagement Section (Like, Comment - Read Only)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        // Likes
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.favorite,
-                              color: Colors.red[400],
-                              size: 24,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${post.likes}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'ถูกใจ',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Divider
-                        Container(
-                          height: 30,
-                          width: 1,
-                          color: Colors.grey[300],
-                        ),
-
-                        // Comments
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.chat_bubble,
-                              color: Colors.blue[400],
-                              size: 24,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${post.comments}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'ความคิดเห็น',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                const SizedBox(height: 40),
-              ],
+                    const SizedBox(height: 40),
+                  ],
+                );
+              },
             ),
           ),
         ],
       ),
+      floatingActionButton: _isOwner
+          ? FloatingActionButton(
+              onPressed: _showOptionsBottomSheet,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: const Icon(Icons.more_vert, color: Colors.white),
+            )
+          : null,
+
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
     );
   }

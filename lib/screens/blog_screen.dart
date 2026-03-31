@@ -40,13 +40,15 @@ class BlogScreen extends StatelessWidget {
 
                   final allPosts = snapshot.data ?? [];
 
-                  // ไม่มีข้อมูล
                   if (allPosts.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'ยังไม่มีบทความ\nกด + เพื่อเพิ่มบทความแรก!',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     );
                   }
@@ -60,7 +62,7 @@ class BlogScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildIntroSection(colorScheme),
+                        _buildIntroSection(context, colorScheme),
                         if (popularPosts.isNotEmpty)
                           _buildPopularSection(
                             popularPosts,
@@ -120,7 +122,7 @@ class BlogScreen extends StatelessWidget {
     return {'name': 'ผู้ใช้', 'avatar': ''};
   }
 
-  Widget _buildIntroSection(ColorScheme colorScheme) {
+  Widget _buildIntroSection(BuildContext context, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -128,8 +130,7 @@ class BlogScreen extends StatelessWidget {
         children: [
           Text(
             'บทความแนะนำ',
-            style: TextStyle(
-              fontSize: 24,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
             ),
@@ -137,7 +138,9 @@ class BlogScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'เรื่องราวและประสบการณ์การเดินทางจากนักเดินทาง',
-            style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -156,8 +159,7 @@ class BlogScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             'บทความยอดนิยม',
-            style: TextStyle(
-              fontSize: 18,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
             ),
@@ -194,14 +196,18 @@ class BlogScreen extends StatelessWidget {
   }
 
   Widget _buildRecentSection(List<BlogPost> posts, BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'บทความล่าสุด',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 16),
           ListView.builder(
@@ -237,7 +243,15 @@ class BlogScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(Icons.article_outlined, color: colorScheme.onSurfaceVariant),
+          IconButton(
+            icon: Icon(Icons.bookmark_border),
+            color: colorScheme.onSurfaceVariant,
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('บทความที่บันทึกไว้')),
+              );
+            },
+          ),
           Text(
             'บทความ',
             style: TextStyle(
@@ -246,7 +260,15 @@ class BlogScreen extends StatelessWidget {
               color: colorScheme.onSurface,
             ),
           ),
-          Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+          IconButton(
+            icon: Icon(Icons.search),
+            color: colorScheme.onSurfaceVariant,
+            onPressed: () {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('ค้นหาบทความ')));
+            },
+          ),
         ],
       ),
     );

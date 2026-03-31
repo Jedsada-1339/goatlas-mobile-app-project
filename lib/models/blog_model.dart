@@ -14,6 +14,7 @@ class BlogPost {
   final int comments;
   final List<String> tags;
   final List<String> images;
+  final List<String> likedBy;
 
   BlogPost({
     required this.id,
@@ -29,6 +30,7 @@ class BlogPost {
     this.comments = 0,
     this.tags = const [],
     this.images = const [],
+    this.likedBy = const [],
   });
 
   // แปลงจาก Firestore → BlogPost
@@ -59,6 +61,7 @@ class BlogPost {
               .toList() ??
           [],
       images: List<String>.from(json['images'] ?? []),
+      likedBy: List<String>.from(json['likedBy'] ?? []),
     );
   }
 
@@ -77,6 +80,7 @@ class BlogPost {
       'comments': comments,
       'tags': tags,
       'images': images,
+      'likedBy': likedBy,
     };
   }
 
@@ -106,5 +110,23 @@ class BlogPost {
   String get contentPreview {
     if (content.length <= 80) return content;
     return '${content.substring(0, 80)}...';
+  }
+
+  BlogPost copyWith({int? likes, List<String>? likedBy}) {
+    return BlogPost(
+      id: id,
+      title: title,
+      content: content,
+      authorName: authorName,
+      authorAvatar: authorAvatar,
+      authorId: authorId,
+      coverImage: coverImage,
+      publishedDate: publishedDate,
+      readTime: readTime,
+      tags: tags,
+      images: images,
+      likes: likes ?? this.likes,
+      likedBy: likedBy ?? this.likedBy,
+    );
   }
 }
