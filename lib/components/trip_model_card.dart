@@ -17,7 +17,7 @@ class TripModelCard extends StatelessWidget {
     this.onDelete,
   });
 
-  Widget _buildCoverImage() {
+  Widget _buildCoverImage(BuildContext context) {
     final url = trip.coverImageUrl;
 
     // Local file path
@@ -40,38 +40,48 @@ class TripModelCard extends StatelessWidget {
         width: double.infinity,
         height: 160,
         fit: BoxFit.cover,
-        errorWidget: _buildPlaceholder(),
+        errorWidget: _buildPlaceholder(context),
       );
     }
 
     // Empty / fallback
-    return _buildPlaceholder();
+    return _buildPlaceholder(context);
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       height: 160,
-      color: const Color(0xFFE2E8F0),
-      child: const Icon(Icons.landscape, size: 60, color: Colors.grey),
+      color: colorScheme.surfaceVariant,
+      child: Icon(
+        Icons.landscape,
+        size: 60,
+        color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: colorScheme.shadow.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
           ],
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.5),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +93,7 @@ class TripModelCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  _buildCoverImage(),
+                  _buildCoverImage(context),
                   // Gradient Overlay
                   Positioned(
                     bottom: 0,
@@ -113,15 +123,15 @@ class TripModelCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: colorScheme.surface.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         trip.dateRangeText,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF0F172A),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -136,7 +146,7 @@ class TripModelCard extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
+                            color: colorScheme.surface.withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -145,8 +155,8 @@ class TripModelCard extends StatelessWidget {
                                 : Icons.favorite_border,
                             size: 20,
                             color: trip.isFavorite
-                                ? Colors.red
-                                : const Color(0xFF64748B),
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -166,10 +176,10 @@ class TripModelCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           trip.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -180,13 +190,13 @@ class TripModelCard extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFEE2E2),
+                              color: colorScheme.errorContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.delete_outline,
                               size: 18,
-                              color: Color(0xFFEF4444),
+                              color: colorScheme.error,
                             ),
                           ),
                         ),
@@ -196,11 +206,13 @@ class TripModelCard extends StatelessWidget {
                   Row(
                     children: [
                       _buildInfoChip(
+                        context,
                         Icons.calendar_today_outlined,
                         '${trip.totalDays} วัน',
                       ),
                       const SizedBox(width: 12),
                       _buildInfoChip(
+                        context,
                         Icons.location_on_outlined,
                         '${trip.totalPlaces} สถานที่',
                       ),
@@ -215,24 +227,25 @@ class TripModelCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String text) {
+  Widget _buildInfoChip(BuildContext context, IconData icon, String text) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: colorScheme.surfaceVariant.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF64748B)),
+          Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF64748B),
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],

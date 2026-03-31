@@ -81,6 +81,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
 
   // บันทึกการแก้ไข
   Future<void> _submit() async {
+    final colorScheme = Theme.of(context).colorScheme;
     if (!_formKey.currentState!.validate()) return;
     if (_coverImageBase64 == null || _coverImageBase64!.isEmpty) {
       ScaffoldMessenger.of(
@@ -119,9 +120,9 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('แก้ไขบทความสำเร็จ!'),
-            backgroundColor: Colors.green,
+            backgroundColor: colorScheme.primary,
           ),
         );
         Navigator.pop(context); // กลับไปหน้าก่อนหน้า
@@ -131,7 +132,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -321,6 +322,7 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
   // Widget: เลือกรูปปก
   // ─────────────────────────────────────────────
   Widget _buildCoverImagePicker() {
+    final colorScheme = Theme.of(context).colorScheme;
     Widget imageWidget;
 
     // กรณีเลือกรูปใหม่จากเครื่อง
@@ -390,10 +392,10 @@ class _EditBlogScreenState extends State<EditBlogScreen> {
                 bottom: 8,
                 right: 8,
                 child: CircleAvatar(
-                  backgroundColor: Colors.black54,
+                  backgroundColor: colorScheme.surface.withOpacity(0.8),
                   radius: 18,
                   child: IconButton(
-                    icon: const Icon(Icons.edit, size: 16, color: Colors.white),
+                    icon: Icon(Icons.edit, size: 16, color: colorScheme.onSurface),
                     onPressed: _pickImage,
                     padding: EdgeInsets.zero,
                   ),

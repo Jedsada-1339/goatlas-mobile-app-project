@@ -115,6 +115,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
     Color color,
     int sequence,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     _markers.add(
       Marker(
         point: point,
@@ -127,7 +128,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: colorScheme.surface.withOpacity(0.9),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(color: color, width: 1),
               ),
@@ -135,8 +136,8 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                 place.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                   fontSize: 10,
                 ),
@@ -326,21 +327,21 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                   MarkerLayer(
                     markers: _markers.isEmpty
                         ? [
-                            const Marker(
-                              point: LatLng(16.4746, 102.8230),
+                            Marker(
+                              point: const LatLng(16.4746, 102.8230),
                               width: 80,
                               height: 80,
                               child: Column(
                                 children: [
                                   Icon(
                                     Icons.location_on,
-                                    color: Colors.red,
+                                    color: colorScheme.error,
                                     size: 40,
                                   ),
                                   Text(
                                     'KKU',
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: colorScheme.onSurface,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -372,9 +373,9 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: colorScheme.shadow.withOpacity(0.1),
                       blurRadius: 20,
-                      offset: Offset(0, -5),
+                      offset: const Offset(0, -5),
                     ),
                   ],
                 ),
@@ -476,17 +477,17 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: colorScheme.shadow.withOpacity(0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+                child: Icon(Icons.arrow_back, color: colorScheme.onSurface),
               ),
             ),
           ),
@@ -691,6 +692,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
   }
 
   Widget _buildDaySection(int index) {
+    final colorScheme = Theme.of(context).colorScheme;
     final dayPlan = _trip.dayPlans[index];
     final date = _trip.startDate?.add(Duration(days: index));
     final String dateText = date != null
@@ -745,7 +747,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
               padding: const EdgeInsets.only(left: 20, bottom: 24),
               child: Text(
                 'ไม่มีแผนการเดินทาง',
-                style: TextStyle(color: Colors.grey[400]),
+                style: TextStyle(color: colorScheme.onSurfaceVariant.withOpacity(0.5)),
               ),
             )
           else
@@ -776,6 +778,7 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
   }
 
   Widget _buildTimelineItem(PlaceModel place, int dayIndex, int placeIndex) {
+    final colorScheme = Theme.of(context).colorScheme;
     final bool isLast =
         placeIndex == _trip.dayPlans[dayIndex].places.length - 1;
 
@@ -798,17 +801,17 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                     decoration: BoxDecoration(
                       color: place.isVisited
                           ? Theme.of(context).primaryColor
-                          : Theme.of(context).colorScheme.onPrimary,
+                          : colorScheme.surface,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: place.isVisited
                             ? Theme.of(context).primaryColor
-                            : const Color(0xFFCBD5E1),
+                            : colorScheme.outlineVariant,
                         width: 2,
                       ),
                     ),
                     child: place.isVisited
-                        ? Icon(Icons.check, size: 14, color: Theme.of(context).colorScheme.onPrimary)
+                        ? Icon(Icons.check, size: 14, color: colorScheme.onPrimary)
                         : null,
                   ),
                 ],
@@ -925,10 +928,10 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                                   color: Colors.blue.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.directions,
                                   size: 16,
-                                  color: Colors.blue,
+                                  color: colorScheme.primary, // Using primary for directions
                                 ),
                               ),
                             ),
@@ -937,41 +940,41 @@ class _TripTimelineScreenState extends State<TripTimelineScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 14,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            place.duration,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 14,
+                              color: colorScheme.onSurfaceVariant.withOpacity(0.7),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 14,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              place.location,
+                            const SizedBox(width: 4),
+                            Text(
+                              place.duration,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey[500],
+                                color: colorScheme.onSurfaceVariant,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 14,
+                              color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                place.location,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

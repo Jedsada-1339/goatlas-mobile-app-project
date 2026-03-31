@@ -178,11 +178,13 @@ class _TripsListScreenState extends State<TripsListScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? primaryColor : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                  color: isSelected ? primaryColor : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(20),
-                  border: isSelected
-                      ? null
-                      : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  border: Border.all(
+                    color: isSelected 
+                        ? primaryColor 
+                        : Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                  ),
                 ),
                 child: Center(
                   child: Text(
@@ -336,9 +338,9 @@ class _TripsListScreenState extends State<TripsListScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: primaryColor.withOpacity(0.4),
+            blurRadius: 25,
+            offset: const Offset(0, 12),
           ),
         ],
       ),

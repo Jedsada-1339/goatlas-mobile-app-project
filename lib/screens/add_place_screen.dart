@@ -250,6 +250,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   }
 
   Widget _buildPlacesList() {
+    final colorScheme = Theme.of(context).colorScheme;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -264,7 +265,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             Icon(
               Icons.location_off_outlined,
               size: 64,
-              color: Colors.grey[300],
+              color: colorScheme.outlineVariant,
             ),
             const SizedBox(height: 16),
             Text(
@@ -272,13 +273,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[500],
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'ลองค้นหาด้วยคำอื่นหรือเปลี่ยนหมวดหมู่',
-              style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+              style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant.withOpacity(0.5)),
             ),
           ],
         ),
@@ -333,8 +334,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                   errorWidget: Container(
                     width: 80,
                     height: 80,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.landscape, color: Colors.grey[400]),
+                    color: colorScheme.surfaceVariant,
+                    child: Icon(Icons.landscape, color: colorScheme.onSurfaceVariant),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -387,9 +388,9 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         const SizedBox(height: 4),
                         Text(
                           place.description,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF64748B),
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -511,11 +512,11 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     errorWidget: Container(
                       width: double.infinity,
                       height: 120,
-                      color: Colors.grey[300],
-                      child: const Icon(
+                      color: colorScheme.surfaceVariant,
+                      child: Icon(
                         Icons.landscape,
                         size: 40,
-                        color: Colors.grey,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),

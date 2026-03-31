@@ -71,11 +71,15 @@ class BlogCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color.fromARGB(255, 137, 82, 82).withOpacity(0.08),
+              color: colorScheme.shadow.withOpacity(0.08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.5),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,8 +116,10 @@ class BlogCard extends StatelessWidget {
                           ),
                           child: Text(
                             tag,
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(color: const Color(0xFF00BCD4)),
+                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         );
                       }).toList(),

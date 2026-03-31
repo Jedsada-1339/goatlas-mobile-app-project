@@ -48,7 +48,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('เช็คอินสำเร็จ! คุณได้รับ $randomPoints คะแนน'),
-          backgroundColor: Colors.green,
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
       // คืนค่า true ให้หน้าทริปทราบว่าสำเร็จ เพื่อทำเครื่องหมาย Visit
@@ -58,7 +58,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('เกิดข้อผิดพลาด: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -138,7 +138,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: colorScheme.shadow.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     )
@@ -171,7 +171,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                     height: 400,
                                     decoration: BoxDecoration(
                                       border: Border.all(
-                                        color: Theme.of(context).primaryColor,
+                                        color: colorScheme.primary,
                                         width: 15,
                                       ),
                                     ),
@@ -179,13 +179,13 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                       alignment: Alignment.bottomCenter,
                                       child: Container(
                                         width: double.infinity,
-                                        color: Theme.of(context).primaryColor.withOpacity(0.8),
+                                        color: colorScheme.primary.withOpacity(0.8),
                                         padding: const EdgeInsets.all(8),
                                         child: Text(
                                           'Go Atlas - ${widget.place.name}',
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            color: Colors.white,
+                                          style: TextStyle(
+                                            color: colorScheme.onPrimary,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -251,8 +251,8 @@ class _CheckInScreenState extends State<CheckInScreen> {
                   label: const Text('ถ่ายรูปเลย!'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -277,17 +277,17 @@ class _CheckInScreenState extends State<CheckInScreen> {
                     ElevatedButton.icon(
                       onPressed: _isCheckingIn ? null : _checkIn,
                       icon: _isCheckingIn 
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20, 
                               height: 20, 
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                              child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2)
                             ) 
                           : const Icon(Icons.check_circle),
                       label: Text(_isCheckingIn ? 'กำลังบันทึก...' : 'ยืนยันเช็คอิน'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),

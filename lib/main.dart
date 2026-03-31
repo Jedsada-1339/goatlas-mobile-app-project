@@ -65,11 +65,15 @@ class MyApp extends StatelessWidget {
           seedColor: const Color(0xFF00BCD4),
           brightness: Brightness.dark,
           primary: const Color(0xFF00BCD4),
-          surface: const Color(0xFF0F172A),
+          surface: const Color(0xFF0F172A), // Slate 900
+          surfaceVariant: const Color(0xFF1E293B), // Slate 800
+          onSurfaceVariant: const Color(0xFF94A3B8), // Slate 400
+          outlineVariant: const Color(0xFF334155), // Slate 700
+          shadow: Colors.black,
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.promptTextTheme(ThemeData.dark().textTheme),
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        scaffoldBackgroundColor: const Color(0xFF020617), // Slate 950 (Midnight)
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor: Colors.transparent,

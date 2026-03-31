@@ -247,7 +247,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.bookmark_outline, color: Colors.black87),
+                icon: Icon(Icons.bookmark_outline, color: colorScheme.onSurface),
                 onPressed: () {
                   ScaffoldMessenger.of(
                     context,
@@ -296,17 +296,17 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                                     widget.post.authorAvatar,
                                   )
                                 : null,
-                            backgroundColor: const Color(0xFF00BCD4),
+                            backgroundColor: colorScheme.primary,
                             child: widget.post.authorAvatar.isEmpty
                                 ? Text(
                                     widget.post.authorName.isNotEmpty
                                         ? widget.post.authorName[0]
                                               .toUpperCase()
                                         : '?',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white,
+                                      color: colorScheme.onPrimary,
                                     ),
                                   )
                                 : null,
@@ -320,10 +320,10 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                               children: [
                                 Text(
                                   'By ${widget.post.authorName}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -333,7 +333,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                                       'Tag : ',
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: Colors.grey[600],
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                     // Tags
@@ -351,16 +351,14 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                                                       vertical: 4,
                                                     ),
                                                 decoration: BoxDecoration(
-                                                  color: const Color(
-                                                    0xFF00BCD4,
-                                                  ),
+                                                  color: colorScheme.primary,
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                 ),
                                                 child: Text(
                                                   tag,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
+                                                  style: TextStyle(
+                                                    color: colorScheme.onPrimary,
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w600,
                                                   ),
@@ -401,10 +399,10 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
                         post.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: colorScheme.onSurface,
                           height: 1.3,
                         ),
                       ),
@@ -420,28 +418,28 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                           Icon(
                             Icons.access_time,
                             size: 16,
-                            color: Colors.grey[500],
+                            color: colorScheme.onSurfaceVariant.withOpacity(0.5),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             post.timeAgo,
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(width: 16),
                           Icon(
                             Icons.timer_outlined,
                             size: 16,
-                            color: Colors.grey[500],
+                            color: colorScheme.onSurfaceVariant.withOpacity(0.5),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '${post.readTime} นาทีในการอ่าน',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -451,7 +449,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                     const SizedBox(height: 20),
 
                     // Divider
-                    Divider(height: 1, color: Colors.grey[300]),
+                    Divider(height: 1, color: colorScheme.outlineVariant),
 
                     const SizedBox(height: 20),
 
@@ -462,22 +460,27 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                         data: post.content,
 
                         styleSheet: MarkdownStyleSheet(
-                          p: const TextStyle(
+                          p: TextStyle(
                             fontSize: 16,
-                            color: Colors.black87,
+                            color: colorScheme.onSurface,
                             height: 1.6,
                           ),
-                          h1: const TextStyle(
+                          h1: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
                           ),
-                          h2: const TextStyle(
+                          h2: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
                           ),
-                          strong: const TextStyle(fontWeight: FontWeight.bold),
-                          blockquote: const TextStyle(
-                            color: Colors.grey,
+                          strong: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                          blockquote: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -494,9 +497,9 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: colorScheme.surfaceVariant.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -521,18 +524,18 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                                             ),
                                           )
                                         : Icon(
-                                            isLiked // ใช้ตัวแปร isLiked ที่คำนวณจาก snapshot ด้านบนแล้ว
+                                            isLiked
                                                 ? Icons.favorite
                                                 : Icons.favorite_border,
                                             color: isLiked
-                                                ? Colors.red[400]
-                                                : Colors.grey[600],
+                                                ? colorScheme.error
+                                                : colorScheme.onSurfaceVariant,
                                             size: 24,
                                           ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      '${post.likes}', //
-                                      style: const TextStyle(
+                                      '${post.likes}',
+                                      style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.black87,
@@ -563,16 +566,16 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                               children: [
                                 Icon(
                                   Icons.chat_bubble_outline,
-                                  color: Colors.grey[600],
+                                  color: colorScheme.onSurfaceVariant,
                                   size: 24,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '${widget.post.comments}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -580,7 +583,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                                   'ความคิดเห็น',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey[600],
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],

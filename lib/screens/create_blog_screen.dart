@@ -77,6 +77,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
   // บันทึกบทความ → Firebase
   Future<void> _submit() async {
+    final colorScheme = Theme.of(context).colorScheme;
     if (!_formKey.currentState!.validate()) return;
     if (_coverImageFile == null) {
       ScaffoldMessenger.of(
@@ -118,9 +119,9 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('เผยแพร่บทความสำเร็จ!'),
-            backgroundColor: Colors.green,
+            backgroundColor: colorScheme.primary,
           ),
         );
         Navigator.pop(context);
@@ -130,7 +131,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('เกิดข้อผิดพลาด: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -308,6 +309,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
   // Widget: เลือกรูปปก
   // ─────────────────────────────────────────────
   Widget _buildCoverImagePicker() {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: _pickImage,
       child: Container(
@@ -354,13 +356,13 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: CircleAvatar(
-                    backgroundColor: Colors.black54,
+                    backgroundColor: colorScheme.surface.withOpacity(0.8),
                     radius: 18,
                     child: IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.edit,
                         size: 16,
-                        color: Colors.white,
+                        color: colorScheme.onSurface,
                       ),
                       onPressed: _pickImage,
                       padding: EdgeInsets.zero,
