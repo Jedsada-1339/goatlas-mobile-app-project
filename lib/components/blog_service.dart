@@ -50,24 +50,7 @@ class BlogService {
         .map((snapshot) {
           return snapshot.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            final post = BlogPost.fromJson(data);
-
-            // ส่งคืนข้อมูลตามที่ถูกบันทึกมา ป้องกันการนำรูป/ชื่อของ user ปัจจุบันไปใส่แทน
-            return BlogPost(
-              id: doc.id,
-              title: post.title,
-              content: post.content,
-              authorName: post.authorName,
-              authorAvatar: post.authorAvatar,
-              coverImage: post.coverImage,
-              publishedDate: post.publishedDate,
-              readTime: post.readTime,
-              likes: post.likes,
-              comments: post.comments,
-              tags: post.tags,
-              images: post.images,
-              authorId: post.authorId,
-            );
+            return BlogPost.fromJson({...data, 'id': doc.id});
           }).toList();
         });
   }

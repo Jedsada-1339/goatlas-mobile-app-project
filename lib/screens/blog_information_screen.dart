@@ -7,6 +7,7 @@ import '../models/blog_model.dart';
 import 'dart:convert';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:goatlas/screens/edit_blog_screen.dart';
 
 class BlogInformationScreen extends StatefulWidget {
   final BlogPost post;
@@ -19,6 +20,10 @@ class BlogInformationScreen extends StatefulWidget {
 
 class _BlogInformationScreenState extends State<BlogInformationScreen> {
   bool _isLiking = false;
+  bool get _isOwner {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    return uid != null && uid == widget.post.authorId;
+  }
 
   Widget _buildImage(String imageData) {
     // ตรวจสอบว่าเป็น Base64 หรือไม่
@@ -49,11 +54,17 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 50),
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 50,
+              ),
               const SizedBox(height: 8),
               Text(
                 'ไม่สามารถโหลดรูปภาพได้',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -71,7 +82,11 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
         ),
         errorWidget: (context, url, error) => Container(
           color: Theme.of(context).colorScheme.surfaceVariant,
-          child: Icon(Icons.broken_image, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 50),
+          child: Icon(
+            Icons.broken_image,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: 50,
+          ),
         ),
       );
     }
@@ -88,6 +103,110 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
     } finally {
       if (mounted) setState(() => _isLiking = false);
     }
+  }
+
+  // ฟังก์ชันแก้ไขบล็อก
+  void _editBlog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditBlogScreen(post: widget.post),
+      ),
+    );
+  }
+
+  // ฟังก์ชันลบบล็อก
+  Future<void> _deleteBlog() async {
+    // 1. ถามยืนยัน
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ยืนยันการลบ'),
+        content: const Text(
+          'คุณต้องการลบบทความนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        // เก็บ Navigator และ Messenger ไว้ก่อนเผื่อ context เปลี่ยน
+        final navigator = Navigator.of(context);
+        final messenger = ScaffoldMessenger.of(context);
+
+        await BlogService.instance.deleteBlog(widget.post.id);
+
+        if (!mounted) return;
+
+        // แสดง SnackBar
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('ลบบทความสำเร็จ'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // 2. ปิดหน้า Detail (กลับไปหน้า Feed)
+        navigator.pop();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('เกิดข้อผิดพลาด: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  // แสดง Bottom Sheet สำหรับเลือกแก้ไขหรือลบ
+  void _showOptionsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.blue),
+              title: const Text('แก้ไขบทความ'),
+              onTap: () {
+                Navigator.pop(context);
+                _editBlog();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text(
+                'ลบบทความ',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _deleteBlog();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -146,12 +265,17 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                   .doc(widget.post.id)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (!snapshot.hasData)
                   return const Center(child: CircularProgressIndicator());
-                }
+
+                // เพิ่มการเช็ค exists เพื่อกัน Crash ตอนลบ
+                if (!snapshot.data!.exists) return const SizedBox();
 
                 final data = snapshot.data!.data() as Map<String, dynamic>;
-                final post = BlogPost.fromJson(data);
+                final post = BlogPost.fromJson({
+                  ...data,
+                  'id': snapshot.data!.id,
+                });
 
                 final uid = FirebaseAuth.instance.currentUser?.uid;
                 final isLiked = post.likedBy.contains(uid);
@@ -256,7 +380,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                     ),
 
                     // Cover Image
-                    if (widget.post.coverImage.isNotEmpty)
+                    if (post.coverImage.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: ClipRRect(
@@ -264,18 +388,19 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                           child: SizedBox(
                             height: 240,
                             width: double.infinity,
-                            child: _buildImage(widget.post.coverImage),
+                            child: _buildImage(
+                              post.coverImage,
+                            ), // ใช้ post แทน widget.post
                           ),
                         ),
                       ),
-
                     const SizedBox(height: 20),
 
                     // Title
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
-                        widget.post.title,
+                        post.title,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -299,7 +424,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            widget.post.timeAgo,
+                            post.timeAgo,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey[600],
@@ -313,7 +438,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${widget.post.readTime} นาทีในการอ่าน',
+                            '${post.readTime} นาทีในการอ่าน',
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey[600],
@@ -334,7 +459,7 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: MarkdownBody(
-                        data: widget.post.content,
+                        data: post.content,
 
                         styleSheet: MarkdownStyleSheet(
                           p: const TextStyle(
@@ -475,6 +600,14 @@ class _BlogInformationScreenState extends State<BlogInformationScreen> {
           ),
         ],
       ),
+      floatingActionButton: _isOwner
+          ? FloatingActionButton(
+              onPressed: _showOptionsBottomSheet,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: const Icon(Icons.more_vert, color: Colors.white),
+            )
+          : null,
+
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
     );
   }
